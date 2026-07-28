@@ -1,0 +1,102 @@
+2026-07-28 02:02:28,423 [INFO] 开始爬取，已跳过 0 页
+2026-07-28 02:02:28,424 [INFO] 正在爬取第 1 页: https://bangumi.tv/anime/browser?sort=rank&page=1
+2026-07-28 02:02:29,685 [INFO] 第 1 页解析出 24 条
+2026-07-28 02:03:43,137 [INFO] 正在爬取第 2 页: https://bangumi.tv/anime/browser?sort=rank&page=2
+2026-07-28 02:03:43,671 [INFO] 第 2 页解析出 24 条
+2026-07-28 02:04:59,974 [INFO] 正在爬取第 3 页: https://bangumi.tv/anime/browser?sort=rank&page=3
+2026-07-28 02:05:00,460 [INFO] 第 3 页解析出 24 条
+2026-07-28 02:06:13,136 [INFO] 正在爬取第 4 页: https://bangumi.tv/anime/browser?sort=rank&page=4
+2026-07-28 02:06:13,586 [INFO] 第 4 页解析出 24 条
+2026-07-28 02:07:20,685 [INFO] 正在爬取第 5 页: https://bangumi.tv/anime/browser?sort=rank&page=5
+2026-07-28 02:07:21,132 [INFO] 第 5 页解析出 24 条
+2026-07-28 02:08:34,750 [INFO] 正在爬取第 6 页: https://bangumi.tv/anime/browser?sort=rank&page=6
+2026-07-28 02:08:35,276 [INFO] 第 6 页解析出 24 条
+2026-07-28 02:09:42,135 [INFO] 正在爬取第 7 页: https://bangumi.tv/anime/browser?sort=rank&page=7
+2026-07-28 02:09:42,683 [INFO] 第 7 页解析出 24 条
+2026-07-28 02:10:57,329 [INFO] 正在爬取第 8 页: https://bangumi.tv/anime/browser?sort=rank&page=8
+2026-07-28 02:10:57,794 [INFO] 第 8 页解析出 24 条
+2026-07-28 02:12:10,201 [INFO] 正在爬取第 9 页: https://bangumi.tv/anime/browser?sort=rank&page=9
+2026-07-28 02:12:10,652 [INFO] 第 9 页解析出 24 条
+2026-07-28 02:13:20,432 [INFO] 正在爬取第 10 页: https://bangumi.tv/anime/browser?sort=rank&page=10
+2026-07-28 02:13:20,887 [INFO] 第 10 页解析出 24 条
+2026-07-28 02:14:30,685 [INFO] 正在爬取第 11 页: https://bangumi.tv/anime/browser?sort=rank&page=11
+2026-07-28 02:14:31,137 [INFO] 第 11 页解析出 24 条
+2026-07-28 02:15:41,152 [INFO] 正在爬取第 12 页: https://bangumi.tv/anime/browser?sort=rank&page=12
+2026-07-28 02:15:41,597 [INFO] 第 12 页解析出 24 条
+2026-07-28 02:16:56,149 [INFO] 正在爬取第 13 页: https://bangumi.tv/anime/browser?sort=rank&page=13
+2026-07-28 02:16:56,601 [INFO] 第 13 页解析出 24 条
+2026-07-28 02:18:04,518 [INFO] 正在爬取第 14 页: https://bangumi.tv/anime/browser?sort=rank&page=14
+2026-07-28 02:18:04,977 [INFO] 第 14 页解析出 24 条
+2026-07-28 02:19:19,420 [INFO] 正在爬取第 15 页: https://bangumi.tv/anime/browser?sort=rank&page=15
+2026-07-28 02:19:19,887 [INFO] 第 15 页解析出 24 条
+2026-07-28 02:20:28,802 [INFO] 正在爬取第 16 页: https://bangumi.tv/anime/browser?sort=rank&page=16
+2026-07-28 02:20:29,327 [INFO] 第 16 页解析出 24 条
+2026-07-28 02:21:42,659 [INFO] 正在爬取第 17 页: https://bangumi.tv/anime/browser?sort=rank&page=17
+2026-07-28 02:21:45,956 [INFO] 第 17 页解析出 24 条
+2026-07-28 02:23:02,539 [INFO] 正在爬取第 18 页: https://bangumi.tv/anime/browser?sort=rank&page=18
+2026-07-28 02:23:03,379 [INFO] 第 18 页解析出 24 条
+2026-07-28 02:24:16,547 [INFO] 正在爬取第 19 页: https://bangumi.tv/anime/browser?sort=rank&page=19
+2026-07-28 02:24:17,308 [INFO] 第 19 页解析出 24 条
+2026-07-28 02:25:30,998 [INFO] 正在爬取第 20 页: https://bangumi.tv/anime/browser?sort=rank&page=20
+2026-07-28 02:25:31,531 [INFO] 第 20 页解析出 24 条
+2026-07-28 02:26:41,694 [INFO] 正在爬取第 21 页: https://bangumi.tv/anime/browser?sort=rank&page=21
+2026-07-28 02:26:42,236 [INFO] 第 21 页解析出 24 条
+2026-07-28 02:27:53,572 [INFO] 正在爬取第 22 页: https://bangumi.tv/anime/browser?sort=rank&page=22
+2026-07-28 02:27:54,170 [INFO] 第 22 页解析出 24 条
+2026-07-28 02:29:03,134 [INFO] 正在爬取第 23 页: https://bangumi.tv/anime/browser?sort=rank&page=23
+2026-07-28 02:29:03,669 [INFO] 第 23 页解析出 24 条
+2026-07-28 02:30:12,223 [INFO] 正在爬取第 24 页: https://bangumi.tv/anime/browser?sort=rank&page=24
+2026-07-28 02:30:12,754 [INFO] 第 24 页解析出 24 条
+2026-07-28 02:31:36,378 [INFO] 正在爬取第 25 页: https://bangumi.tv/anime/browser?sort=rank&page=25
+2026-07-28 02:31:37,525 [INFO] 第 25 页解析出 24 条
+2026-07-28 02:32:57,081 [INFO] 正在爬取第 26 页: https://bangumi.tv/anime/browser?sort=rank&page=26
+2026-07-28 02:32:57,616 [INFO] 第 26 页解析出 24 条
+2026-07-28 02:34:14,291 [INFO] 正在爬取第 27 页: https://bangumi.tv/anime/browser?sort=rank&page=27
+2026-07-28 02:34:15,518 [INFO] 第 27 页解析出 24 条
+2026-07-28 02:35:42,288 [INFO] 正在爬取第 28 页: https://bangumi.tv/anime/browser?sort=rank&page=28
+2026-07-28 02:35:42,838 [INFO] 第 28 页解析出 24 条
+2026-07-28 02:36:57,800 [INFO] 正在爬取第 29 页: https://bangumi.tv/anime/browser?sort=rank&page=29
+2026-07-28 02:36:58,374 [INFO] 第 29 页解析出 24 条
+2026-07-28 02:38:17,543 [INFO] 正在爬取第 30 页: https://bangumi.tv/anime/browser?sort=rank&page=30
+2026-07-28 02:38:18,073 [INFO] 第 30 页解析出 24 条
+2026-07-28 02:39:24,698 [INFO] 正在爬取第 31 页: https://bangumi.tv/anime/browser?sort=rank&page=31
+2026-07-28 02:39:25,268 [INFO] 第 31 页解析出 24 条
+2026-07-28 02:40:39,212 [INFO] 正在爬取第 32 页: https://bangumi.tv/anime/browser?sort=rank&page=32
+2026-07-28 02:40:39,742 [INFO] 第 32 页解析出 24 条
+2026-07-28 02:41:59,597 [INFO] 正在爬取第 33 页: https://bangumi.tv/anime/browser?sort=rank&page=33
+2026-07-28 02:42:00,138 [INFO] 第 33 页解析出 24 条
+2026-07-28 02:43:08,668 [INFO] 正在爬取第 34 页: https://bangumi.tv/anime/browser?sort=rank&page=34
+2026-07-28 02:43:11,657 [INFO] 第 34 页解析出 24 条
+2026-07-28 02:44:28,053 [INFO] 正在爬取第 35 页: https://bangumi.tv/anime/browser?sort=rank&page=35
+2026-07-28 02:44:28,622 [INFO] 第 35 页解析出 24 条
+2026-07-28 02:45:38,684 [INFO] 正在爬取第 36 页: https://bangumi.tv/anime/browser?sort=rank&page=36
+2026-07-28 02:45:39,207 [INFO] 第 36 页解析出 24 条
+2026-07-28 02:46:49,104 [INFO] 正在爬取第 37 页: https://bangumi.tv/anime/browser?sort=rank&page=37
+2026-07-28 02:46:49,559 [INFO] 第 37 页解析出 24 条
+2026-07-28 02:47:59,159 [INFO] 正在爬取第 38 页: https://bangumi.tv/anime/browser?sort=rank&page=38
+2026-07-28 02:47:59,620 [INFO] 第 38 页解析出 24 条
+2026-07-28 02:49:06,346 [INFO] 正在爬取第 39 页: https://bangumi.tv/anime/browser?sort=rank&page=39
+2026-07-28 02:49:06,811 [INFO] 第 39 页解析出 24 条
+2026-07-28 02:50:15,862 [INFO] 正在爬取第 40 页: https://bangumi.tv/anime/browser?sort=rank&page=40
+2026-07-28 02:50:16,373 [INFO] 第 40 页解析出 24 条
+2026-07-28 02:51:40,665 [INFO] 正在爬取第 41 页: https://bangumi.tv/anime/browser?sort=rank&page=41
+2026-07-28 02:51:41,089 [INFO] 第 41 页解析出 24 条
+2026-07-28 02:52:48,712 [INFO] 正在爬取第 42 页: https://bangumi.tv/anime/browser?sort=rank&page=42
+2026-07-28 02:52:49,145 [INFO] 第 42 页解析出 24 条
+2026-07-28 02:53:56,754 [INFO] 正在爬取第 43 页: https://bangumi.tv/anime/browser?sort=rank&page=43
+2026-07-28 02:53:57,188 [INFO] 第 43 页解析出 24 条
+2026-07-28 02:55:03,261 [INFO] 正在爬取第 44 页: https://bangumi.tv/anime/browser?sort=rank&page=44
+2026-07-28 02:55:03,705 [INFO] 第 44 页解析出 24 条
+2026-07-28 02:56:06,211 [INFO] 正在爬取第 45 页: https://bangumi.tv/anime/browser?sort=rank&page=45
+2026-07-28 02:56:06,682 [INFO] 第 45 页解析出 24 条
+2026-07-28 02:57:13,058 [INFO] 正在爬取第 46 页: https://bangumi.tv/anime/browser?sort=rank&page=46
+2026-07-28 02:57:13,503 [INFO] 第 46 页解析出 24 条
+2026-07-28 02:58:15,105 [INFO] 正在爬取第 47 页: https://bangumi.tv/anime/browser?sort=rank&page=47
+2026-07-28 02:58:15,525 [INFO] 第 47 页解析出 24 条
+2026-07-28 02:59:18,740 [INFO] 正在爬取第 48 页: https://bangumi.tv/anime/browser?sort=rank&page=48
+2026-07-28 02:59:19,150 [INFO] 第 48 页解析出 24 条
+2026-07-28 03:00:20,856 [INFO] 正在爬取第 49 页: https://bangumi.tv/anime/browser?sort=rank&page=49
+2026-07-28 03:00:21,388 [INFO] 第 49 页解析出 24 条
+2026-07-28 03:01:21,567 [INFO] 正在爬取第 50 页: https://bangumi.tv/anime/browser?sort=rank&page=50
+2026-07-28 03:01:22,048 [INFO] 第 50 页解析出 24 条
+2026-07-28 03:02:22,622 [INFO] 全部完成，结果保存至 d:\Origit\GraduationProject\TechProject\Spider\动漫信息_v2.json
