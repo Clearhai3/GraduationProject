@@ -1,0 +1,27 @@
+﻿# 大文件（超过 GitHub 100MB 限制）
+Spider/itemcf_cooccur.txt
+Spider/user_ratings.jsonl
+
+# 敏感信息（数据库凭据）
+Spider/mysql.text
+
+# 日志文件
+*.log
+Spider/log.txt
+
+# Python 缓存
+__pycache__/
+*.pyc
+*.pyo
+
+# IDE 配置
+.vscode/
+.idea/
+
+# 虚拟环境
+venv/
+.venv/
+env/
+
+# Hadoop 安装包（696MB，超过 GitHub 限制）
+hadoop-3.3.6.tar.gz
