@@ -2,6 +2,16 @@
 Spider/itemcf_cooccur.txt
 Spider/user_ratings.jsonl
 
+# 中间结果（训练/预测 txt，非必需）
+Spider/itemcf_cooccur_train.txt
+Spider/itemcf_sim.txt
+Spider/itemcf_sim_train.txt
+Spider/itemcf_rec.txt
+Spider/itemcf_rec_train.txt
+
+# AI 助手档案（.github 专属内容，不随项目推送）
+.github/
+
 # 敏感信息（数据库凭据）
 Spider/mysql.text
 
