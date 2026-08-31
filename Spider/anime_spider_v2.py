@@ -12,7 +12,7 @@ from urllib3.util.retry import Retry
 
 # -- 配置区 --
 
-TOTAL_PAGE = 50
+TOTAL_PAGE = 209
 BASE_URL = "https://bangumi.tv/anime/browser?sort=rank&page={}"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 OUTPUT_FILE = os.path.join(SCRIPT_DIR, "动漫信息_v2.json")
@@ -200,22 +200,43 @@ def save_progress(done_pages):
 # "安全的 GET 请求"，封装了错误处理逻辑
 def safe_get(session, url, timeout = 15):
     """统一请求，失败返回 None"""
+    """用 curl.exe 请求，绕过代理软件对 Python 进程的拦截""" 
+    import subprocess
+    cmd = [
+        "curl.exe",         # 调用系统 curl (Win10 自带)
+        "-s",               # 静默模式，不打印进度条
+        "-L",               # 跟随重定向 (bangumi 有时 302)
+        "--max-time", str(timeout),     # 超时控制，等价于原来 requests 的 timeout
+        "-H", "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+        "-H", "Accept-Language: zh-CN,zh;q=0.9",
+        "-w", "\n%{http_code}",  # 在正文末尾追加一行状态码，方便我们读取
+        url,
+    ]
     try:
-        # 用 session 发送 GET 请求，带上超时限制。
-        # 如果 15 秒内没响应，会抛出 requests.exceptions.Timeout 异常，跳到 except 块处理。
-        resp = session.get(url, timeout = timeout)
-        # 强制设置响应编码为 UTF-8。
-        resp.encoding = "utf-8"
-        # 检查状态码
-        # HTTP 状态码 200 表示成功
-        # 其他状态码 (如 404、503) 都是异常
-        # 异常时记录警告日志，返回None
-        if resp.status_code != 200:
-            logger.warning("状态码异常 %s: %s", resp.status_code, url)
-            return None
-        # 状态码正常，返回响应对象 resp，后续可以取 resp.text 解析网页。
-        return resp
-    except requests.RequestException as e:
+       result = subprocess.run(
+           cmd, 
+           capture_output = True,   # 捕获 stdout
+           text = True,             # 按文本解码
+           encoding = "utf-8",
+           timeout = timeout + 5    # 给 subprocess 自己留一点余量
+       )
+        #    result.stdout 形如 "……html……\n200"
+        # 用 rsplit 从右边切一次，把最后一行 (状态码) 和正文分开
+       lines = result.stdout.rsplit("\n", 1)
+       body = lines[0]
+       code = int(lines[1]) if len(lines) > 1 and lines[1].strip().isdigit() else 0
+       if code != 200:
+           logger.warning("状态码异常 %s: %s", code, url)
+           return None
+       # 调用方用的是 resp.text 所以返回一个"假响应对象",
+       # 只要它有 .text 属性, 解析代码就不用改。
+       class FakeResp:
+           pass
+       fake = FakeResp()
+       fake.text = body
+       fake.status_code = code
+       return fake
+    except Exception as e:
         # 异常类型              触发场景
         # ConnectionError      连接失败
         # Timeout              请求超时
@@ -358,44 +379,44 @@ def parse_detail_page(session, base_info):
     # 声优: 需要单独请求角色页 /subject/{id}/characters
     # 初始化一个空列表，用来存放最终找到的声优名字
     cv_shengyou = []
-    try:
-        # url 是动漫详情页地址，例如: https://bangumi.tv/subject/326
-        # .rstrip("/") 去掉末尾可能多余的 / ，防止拼出 https://bangumi.tv/subject/326/characters
-        # 为什么不能直接用详情页？
-        # 因为声优信息在 bangumi 网站上是在单独的“角色”页面里，详情页上没有。
-        cv_url = url.rstrip("/") + "/characters"
+    # try:
+    #     # url 是动漫详情页地址，例如: https://bangumi.tv/subject/326
+    #     # .rstrip("/") 去掉末尾可能多余的 / ，防止拼出 https://bangumi.tv/subject/326/characters
+    #     # 为什么不能直接用详情页？
+    #     # 因为声优信息在 bangumi 网站上是在单独的“角色”页面里，详情页上没有。
+    #     cv_url = url.rstrip("/") + "/characters"
 
-        # 用之前定义好的 safe_get 函数 (自带重试、超时、错误处理) 去请求角色页。
-        cv_resp = safe_get(session, cv_url, timeout = 15)
+    #     # 用之前定义好的 safe_get 函数 (自带重试、超时、错误处理) 去请求角色页。
+    #     cv_resp = safe_get(session, cv_url, timeout = 15)
 
-        if cv_resp:
-            # 把角色页的 HTML 文本解析成 BeautifulSoup 对象，方便后续用选择器查找元素。
-            cv_soup = BeautifulSoup(cv_resp.text, "lxml")
+    #     if cv_resp:
+    #         # 把角色页的 HTML 文本解析成 BeautifulSoup 对象，方便后续用选择器查找元素。
+    #         cv_soup = BeautifulSoup(cv_resp.text, "lxml")
 
-            # 这是核心查找逻辑:
-            # 找页面上所有 <a> 标签
-            # 条件是 href 属性里包含 /person/ (bangumi 用 /person/数字 链接到人物页面，声优就是 /person/ 类型的链接)
-            for a in cv_soup.find_all("a", href = lambda x: x and "/person/" in x):
-                # 1， a.parent.name != "p": 如果这个 <a> 标签的父元素不是 <p>, 跳过。因为头像区域的 <a> 被包在 <div> 里，而声优名字的 <a> 被包在 <p> 里，这样就能排除掉头像链接。
-                # 2. not a.get_text(strip = True): 如果 <a> 标签里的文字为空 (比如纯图片链接)，跳过。
-                if a.parent.name != "p" or not a.get_text(strip = True):
-                    continue
-                # 区分 CV / 英配 / 粤配，只取日配 CV
-                cv_type = "CV"
-                p = a.parent
-                for sib in p.next_siblings:
-                    if isinstance(sib, str) and sib.strip() in ("CV", "英配", "粤配"):
-                        cv_type = sib.strip()
-                        break
-                    if hasattr(sib, "get_text"):
-                        text = sib.get_text(strip = True)
-                        if text in ("CV", "英配", "粤配"):
-                            cv_type = text
-                            break
-                if cv_type == "CV":
-                    cv_shengyou.append(a.get_text(strip = True))
-    except Exception as e:
-        logger.error("解析声优出错 %s: %s", url, e)
+    #         # 这是核心查找逻辑:
+    #         # 找页面上所有 <a> 标签
+    #         # 条件是 href 属性里包含 /person/ (bangumi 用 /person/数字 链接到人物页面，声优就是 /person/ 类型的链接)
+    #         for a in cv_soup.find_all("a", href = lambda x: x and "/person/" in x):
+    #             # 1， a.parent.name != "p": 如果这个 <a> 标签的父元素不是 <p>, 跳过。因为头像区域的 <a> 被包在 <div> 里，而声优名字的 <a> 被包在 <p> 里，这样就能排除掉头像链接。
+    #             # 2. not a.get_text(strip = True): 如果 <a> 标签里的文字为空 (比如纯图片链接)，跳过。
+    #             if a.parent.name != "p" or not a.get_text(strip = True):
+    #                 continue
+    #             # 区分 CV / 英配 / 粤配，只取日配 CV
+    #             cv_type = "CV"
+    #             p = a.parent
+    #             for sib in p.next_siblings:
+    #                 if isinstance(sib, str) and sib.strip() in ("CV", "英配", "粤配"):
+    #                     cv_type = sib.strip()
+    #                     break
+    #                 if hasattr(sib, "get_text"):
+    #                     text = sib.get_text(strip = True)
+    #                     if text in ("CV", "英配", "粤配"):
+    #                         cv_type = text
+    #                         break
+    #             if cv_type == "CV":
+    #                 cv_shengyou.append(a.get_text(strip = True))
+    # except Exception as e:
+    #     logger.error("解析声优出错 %s: %s", url, e)
 
     daoyan = base_info.get("导演", "未知")
     jiaoben = base_info.get("脚本", [])
