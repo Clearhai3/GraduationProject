@@ -2,6 +2,9 @@
 Spider/itemcf_cooccur.txt
 Spider/user_ratings.jsonl
 
+# 开题报告/任务书（含个人信息，不进仓库）
+*.docx
+
 # 中间结果（训练/预测 txt，非必需）
 Spider/itemcf_cooccur_train.txt
 Spider/itemcf_sim.txt
