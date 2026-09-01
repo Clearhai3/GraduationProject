@@ -243,3 +243,42 @@ if __name__ == "__main__":
 
     logger.info(f"完成: {mode}")
 
+# 一、Job3 干什么
+# 用"动漫相似度表" + "用户评分"，给每个用户算 Top10 推荐 (排除看过的)。
+
+# 二、推荐分公式 (核心)
+
+# 翻译: "用户给i打了高分，而j和i很像 -> j就该被推荐"。分数 = 相似度 * 评分的累加
+
+# 三、两阶段管道 (为什么要两次 sort)
+# 阶段A: 按"动漫"分组
+#     输入: 相似表(相似Top:动漫\t邻居串) + 评分表(user_id,anime_id,rate)
+#     mapper: 统一输出 "动漫:{anime}\t..." 前缀
+#     sort:   同一部动漫的 【邻居表】和【评分】聚到一起
+#     reduce_a: 用邻居表 x 评分 -> 累加出每个用户的候选分
+#               同时记录"用户看过哪些动漫"（推荐时要过滤）
+#     输出:   "用户:{uid}\t候选:..." 和 "用户:{uid}\t已看:..."
+
+# 阶段B: 按"用户"分组
+#     sort:   同一用户的【候选】和【已看】聚到一起
+#     reduce_b: 过滤已看 -> 按分降序 -> 取 Top10
+#     输出:   "推荐:{uid}\t动漫:分数|动漫:分数|..."
+
+# 为什么两次 sort? 
+# 因为阶段 A 是按"动漫"聚的，算完吐出的数据却是按"用户"组织的————顺序乱了，得重新 sort 一次。两次 sort = 两种分组需求（先按动漫，再按用户）。
+
+# 四、命令（含编码保险丝）
+# $OutputEncoding = [System.Text.Encoding]::UTF8
+
+# # 阶段A
+# Get-Content itemcf_sim_train.txt, train_ratings.csv | python -X utf8 itemcf_job3.py mapper | Sort-Object | python -X utf8 itemcf_job3.py reduce_a | Out-File -Encoding utf8 itemcf_job3_mid.txt
+
+# # 阶段B
+# Get-Content itemcf_job3_mid.txt | Sort-Object | python -X utf8 itemcf_job3.py reducer_b | Out-File -Encoding utf8 itemcf_rec_train.txt
+
+# 五、验证标准
+# itemcf_rec_train.txt ≈ 100 万行级（10,303 用户 × 2 行候选/已看？不对——阶段B 输出是 1 行/用户，应该是 ~10,303 行）
+# 抽查：推荐:{uid}\t{动漫}:{分数}|...（10 部，降序）
+# 质量：推荐的动漫不该在用户的已看列表里
+
+# 六、操作

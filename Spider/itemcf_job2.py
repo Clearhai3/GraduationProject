@@ -44,6 +44,7 @@ def mapper():
     """
     for line in sys.stdin:
         line = line.strip()
+        line = line.lstrip('\ufeff')        # 去掉第一行的 BOM
         if not line:
             continue
         parts = line.split("\t")
@@ -94,6 +95,7 @@ def reducer():
 
     for line in sys.stdin:
         line = line.strip()
+        line = line.lstrip('\ufeff')
         if not line:
             continue
         parts = line.split("\t")

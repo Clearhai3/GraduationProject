@@ -5,12 +5,16 @@ Spider/user_ratings.jsonl
 # 开题报告/任务书（含个人信息，不进仓库）
 *.docx
 
+# 个人笔记（含学习记录，不进仓库）
+笔记.md
+
 # 中间结果（训练/预测 txt，非必需）
 Spider/itemcf_cooccur_train.txt
 Spider/itemcf_sim.txt
 Spider/itemcf_sim_train.txt
 Spider/itemcf_rec.txt
 Spider/itemcf_rec_train.txt
+Spider/itemcf_job3_mid.txt
 
 # AI 助手档案（.github 专属内容，不随项目推送）
 .github/
