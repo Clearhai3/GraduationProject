@@ -15,6 +15,9 @@ Spider/itemcf_rec_train.txt
 # AI 助手档案（.github 专属内容，不随项目推送）
 .github/
 
+# Django 开发数据库（本地 SQLite，不入库）
+WebCode/db.sqlite3
+
 # 敏感信息（数据库凭据）
 Spider/mysql.text
 
