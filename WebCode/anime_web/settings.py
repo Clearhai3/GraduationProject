@@ -75,8 +75,13 @@ WSGI_APPLICATION = 'anime_web.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',   # 告诉 Django 用 MySQL 后端
+        'NAME': 'anime_db',                     # 库名（刚才探测的港口）
+        'USER': 'root',                         # 用户名
+        'PASSWORD': '12345678',                 # 密码
+        'HOST':     '127.0.0.1',                # 本机 MySQL
+        'PORT':     '3306', 
+        'OPTIONS': {'charset': 'utf8mb4'}       
     }
 }
 

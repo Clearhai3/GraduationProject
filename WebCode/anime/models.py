@@ -12,7 +12,7 @@ class Anime(models.Model):
     # blank=True = 表单允许不填
     air_date = models.DateField(null=True, blank=True)     # 放送时间（可能未知）
     # 制作人员（短文本）
-    director = models.CharField(max_length=200, null=True, blank=True)
+    director = models.TextField(null=True, blank=True)
     # 制作人员（长文本：一长串名字）
     script_writer = models.TextField(null=True, blank=True)
     voice_actors = models.TextField(null=True, blank=True)
