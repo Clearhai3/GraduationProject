@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>动漫列表</title>
+</head>
+<body>
+    <h1>动漫列表 (前 20 部) </h1>
+    <table border="1">
+        <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>评分</th>
+        </tr>
+        {% for a in animes %}
+        <tr>
+            <td><a href="/anime/{{ a.subject_id }}">{{ a.name }}</a></td>
+            <td>{{ a.anime_type }}</td>
+            <td>{{ a.rating }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

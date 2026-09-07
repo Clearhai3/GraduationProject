@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{{ anime.name }}</title>
+</head>
+<body>
+    <h1>{{ anime.name }}</h1>
+    {% if anime.cover_url %}
+        <img src="{{ anime.cover_url }}" alt="封面" style="max-height: 300px;">
+    {% endif %}
+    <p><strong>类型：</strong>{{ anime.anime_type }}</p>
+    <p><strong>话数：</strong>{{ anime.episodes }}</p>
+    <p><strong>放送日期：</strong>{{ anime.air_date}}</p>
+    <p><strong>导演：</strong>{{ anime.director }}</p>
+    <p><strong>评分：</strong>{{ anime.rating }} ({{ anime.rating_count}} 人评价) </p>
+
+    <h2>相关推荐</h2>
+    {% if similar_animes %}
+        <ul>
+        {% for s in similar_animes %}
+            <li><a href="/anime/{{ s.subject_id }}/">{{ s.name }}</a> ({{ s.rating }})</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>暂无相关推荐</p>
+    {% endif %}
+
+    <p><a href="/">← 返回列表</a></p>
+</body>
+</html>
