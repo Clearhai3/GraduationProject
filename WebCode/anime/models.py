@@ -27,6 +27,22 @@ class Anime(models.Model):
         return self.name 
     # 返回自己的名字
 
+class AnimeUser(models.Model):
+    # 主键: 动漫用户的 id
+    user_id = models.IntegerField(primary_key=True)
+    username = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.username
+
+class Rating(models.Model):
+    user_id = models.IntegerField(db_index=True)
+    anime = models.ForeignKey(Anime, on_delete=models.CASCADE, db_index=True, related_name="ratings")
+    rate = models.FloatField(null=True, blank=True)     # blank = True 用于检测烂数据bug
+
+    def __str__(self):
+        return f"{self.user_id} 给 {self.anime} 打了 {self.rate}"
+
 # Operations to perform:
 #   Apply all migrations: admin, anime, auth, contenttypes, sessions
 # Running migrations:
