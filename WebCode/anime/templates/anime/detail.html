@@ -1,10 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>{{ anime.name }}</title>
-</head>
-<body>
+{% extends "anime/base.html" %}
+
+{% block title %}{{ anime.name }}{% endblock %}
+
+{% block content %}
     <h1>{{ anime.name }}</h1>
     {% if anime.cover_url %}
         <img src="{{ anime.cover_url }}" alt="封面" style="max-height: 300px;">
@@ -27,5 +25,4 @@
     {% endif %}
 
     <p><a href="/">← 返回列表</a></p>
-</body>
-</html>
+{% endblock %}

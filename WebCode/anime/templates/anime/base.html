@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Bangumi 动漫推荐系统{% endblock %}</title>
+</head>
+<body>
+    <!-- 导航栏: 全站公共的"旗杆"，每页都有 -->
+     <nav>
+        <a href="/">🏠 首页</a>
+        <a href="/search/">🔍 搜索</a>
+        <a href="/rank/">🏆 排行榜</a>
+     </nav>
+     <hr>
+
+     <!-- 货舱位: 每个页面填自己的内容 -->
+    {% block content %}{% endblock %}
+</body>
+</html>

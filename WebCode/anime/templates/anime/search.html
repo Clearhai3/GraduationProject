@@ -1,0 +1,36 @@
+{% extends "anime/base.html" %}
+
+{% block title %}搜索{% endblock %}
+
+{% block content %}
+    <h1>🔍 搜索动漫</h1>
+    <!-- 表单: 提交后浏览器自动拼 ?q=你输入的内容 发给后端 -->
+     <form method="get" action="/search/">
+        <input type="text" name="q" value="{{ keyword }}" placeholder="输入动漫名称">
+        <button type="submit">搜索</button>
+     </form>
+
+    {% if keyword %}
+        <h2>"{{ keyword }}" 的搜索结果</h2>
+        {% if results %}
+        <table border="1">
+            <tr>
+                <th>名称</th>
+                <th>类型</th>
+                <th>评分</th>
+            </tr>
+            {% for a in results %}
+            <tr>
+                <td><a href="/anime/{{ a.subject_id }}">{{ a.name }}</a></td>
+                <td>{{ a.anime_type }}</td>
+                <td>{{ a.rating }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <p>没有找到 "{{ keyword }}" 相关的动漫</p>
+        {% endif %}
+    {% else %}
+        <p>输入关键词开始搜索吧～</p>
+    {% endif %}
+{% endblock %}

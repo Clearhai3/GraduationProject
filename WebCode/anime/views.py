@@ -25,4 +25,13 @@ def anime_detail(request, anime_id):
     # 新增结束
 
     return render(request, "anime/detail.html", {"anime": anime, "similar_animes": similar_animes})
+
+def anime_rank(request):        # 排行榜
+    animes = Anime.objects.order_by("-rating")[:20]     # 评分倒叙，取前 20
+    return render(request, "anime/rank.html", {"animes": animes})
+
+def anime_search(request):      # 搜索
+    keyword = request.GET.get("q", "")      # 拿用户输入，没输就空
+    results = Anime.objects.filter(name__icontains=keyword)[:20] # 名字模糊索
+    return render(request, "anime/search.html", {"results": results, "keyword": keyword})
 # Create your views here.
