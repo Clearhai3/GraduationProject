@@ -1,0 +1,7 @@
+{% for a in page %}
+<tr>
+    <td><a href="/anime/{{ a.subject_id }}">{{ a.name }}</a></td>
+    <td>{{ a.name_type }}</td>
+    <td>{{ a.rating }}</td>
+</tr>
+{% endfor %}

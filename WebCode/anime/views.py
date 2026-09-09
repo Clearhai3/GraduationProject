@@ -1,12 +1,27 @@
 from .models import Anime               # 导入你建的 Anime 模型
 from django.shortcuts import render, get_object_or_404  # 自动回复 404 未找到
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.http import HttpResponse
 import os   # 借 os 工具 (操作系统接口)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def anime_list(request):                # 函数名必须和 urls 里一致
-    animes = Anime.objects.all()[:20]    # 查数据库: 取前 20 部
-    return render(request, "anime/list.html", {"animes": animes})
+    page_num = request.GET.get("page", 1)   # 前段要第几页，默认第 1 页
+    paginator = Paginator(Anime.objects.all(), 20)  # 5009 部 ÷ 20 = 251 页
+    try:
+        page = paginator.page(page_num)     # 要第 N 页 (页码非法会报错)
+    except (PageNotAnInteger, EmptyPage):
+        page = None                         # 页码是乱写的 / 超出范围 = 没货
+    
+    # 带暗号 X-Requested-With 的请求 = AJAX 滚动加载，只回数据行
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        if page is None:
+            return HttpResponse("")         # 空响应 = 告诉前端"到底了"
+        return render(request, "anime/_rows.html", {"page": page, "total_count": paginator.count})
+
+    # 普通访问: 渲染完整首页
+    return render(request, "anime/list.html", {"page": page, "total_count": paginator.count})
 
 def anime_detail(request, anime_id):
     anime = get_object_or_404(Anime, pk=anime_id)   # 原样保留: 查当前动漫

@@ -3,19 +3,51 @@
 {% block title %}动漫列表{% endblock %}
 
 {% block content %}
-    <h1>动漫列表 (前 20 部) </h1>
+    <h1>动漫列表 (共 {{ total_count }} 部) </h1>
     <table border="1">
         <tr>
             <th>名称</th>
             <th>类型</th>
             <th>评分</th>
         </tr>
-        {% for a in animes %}
-        <tr>
-            <td><a href="/anime/{{ a.subject_id }}">{{ a.name }}</a></td>
-            <td>{{ a.anime_type }}</td>
-            <td>{{ a.rating }}</td>
-        </tr>
-        {% endfor %}
+        <tbody id="anime-rows">
+            {% include "anime/_rows.html" %}    <!-- 第 1 页的行 -->
+        </tbody>
     </table>
+    <p id="loading">加载中……</p>
+    <p id="end" style="display: none;">🎉 已经到底啦，一共 {{ total_count }} 部，你都看完啦！</p>
+
+    <script>
+        // 无限滚动
+        let currentPage = 1;        // 当前在第几页
+        let loading = false;        // 防重复请求的保险丝
+
+        window.addEventListener("scroll", function () {
+            // 滚动条离页面底部不足 200px 时，触发加载下一页 (预加载)
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
+                loadNextPage();
+            }
+        });
+
+        function loadNextPage() {
+            if (loading) return;    // 上一次还没回来，别重复发请求
+            loading = true;
+            currentPage += 1;       // 要下一页
+
+            fetch("/?page=" + currentPage, {
+                headers: {"X-Requested-With": "XMLHttpRequest"}     // 接头暗号
+            })
+            .then(res => res.text())    // 拿到的是纯 HTML 行
+            .then(html => {
+                if (html.trim() == "") { // 空 = 服务器说没或了
+                    document.getElementById("loading").style.display = "none";
+                    document.getElementById("end").style.display = "block";
+                    return;
+                }
+                // 把新行追加到表格尾部 (不刷新页面！)
+                document.getElementById("anime-rows").insertAdjacentHTML("beforeend", html);
+                loading = false;        // 放行，允许下一次加载
+            });
+        }
+    </script>
 {% endblock %}
