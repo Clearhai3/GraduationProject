@@ -28,7 +28,7 @@ def anime_detail(request, anime_id):
 
     # 新增: 相关推荐
     similar_animes = []
-    sim_file = os.path.join(BASE_DIR, "../../Spider/itemcf_sim_train.txt")
+    sim_file = os.path.join(BASE_DIR, "../../Spider/algorithms/itemcf/data/itemcf_sim_train.txt")
     with open(sim_file, encoding = "utf-8") as f:   
         for line in f:
             if line.startswith(f"相似Top:{anime_id}\t"):    # 找到本动漫那行
