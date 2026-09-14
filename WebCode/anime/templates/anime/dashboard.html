@@ -20,7 +20,7 @@
     <h1>🔥 热门动漫 Top20</h1>
     <div id="hotChart" style="width: 900px; height: 700px;"></div>
 
-    <h1>📈 年度放送趋势(1980-2026)</h1>
+    <h1>📈 年度放送趋势(1908-2026)</h1>
     <div id="trendChart" style="width: 900px; height: 420px;"></div>
 
     <script src="{% static 'echarts.min.js' %}"></script>
@@ -114,7 +114,7 @@
         const chart6 = echarts.init(document.getElementById('trendChart'));
         chart6.setOption({
             tooltip: { trigger: 'axis' },   // 悬停时按 x 轴取点
-            xAxis: { type: 'value', min: 1980, max: 2030 },
+            xAxis: { type: 'value', min: 1908, max: 2030 },
             yAxis: { type: 'value' },
             series: [{
                 type: 'line',
