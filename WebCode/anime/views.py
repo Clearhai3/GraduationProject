@@ -61,5 +61,38 @@ def anime_dashboard(request):
     # 关键: dict 必须先变成 JSON 字符串才能交给模板
     score_json = json.dumps(score_data, ensure_ascii = False)
 
-    return render(request, "anime/dashboard.html", {"score_data": score_json})
+    with open(os.path.join(data_dir, "users/user_activity.json"), encoding = "utf-8") as f:
+        activity_data = json.load(f)
+
+    activity_json = json.dumps(activity_data, ensure_ascii = False)
+
+    with open(os.path.join(data_dir, "anime/type_distribution.json"), encoding = "utf-8") as f:
+        type_data = json.load(f)
+
+    type_json = json.dumps(type_data, ensure_ascii = False)
+
+    with open(os.path.join(data_dir, "anime/rating_top10.json"), encoding="utf-8") as f:
+        top_data = json.load(f)
+
+    top_json = json.dumps(top_data, ensure_ascii=False)
+
+    with open(os.path.join(data_dir, "anime/hot_anime_top20.json"), encoding="utf-8") as f:
+        hot_data = json.load(f)
+
+    hot_json = json.dumps(hot_data, ensure_ascii=False)
+
+    with open(os.path.join(data_dir, "anime/yearly_trend.json"), encoding = "utf-8") as f:
+        trend_data = json.load(f)
+
+    trend_json = json.dumps(trend_data, ensure_ascii = False)
+
+    return render(request, "anime/dashboard.html", {
+        "score_data": score_json,
+        "activity_data": activity_json,
+        "type_data": type_json,
+        "top_data": top_json,
+        "hot_data": hot_json,
+        "trend_data": trend_json,
+    })
+
 # Create your views here.

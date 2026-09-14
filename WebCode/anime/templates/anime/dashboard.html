@@ -5,9 +5,23 @@
 
 {% block content %}
     <h1>📊 评分分布</h1>
-
     <!-- ECharts 的"画布": 必须有宽高, 不然图会缩成 0 高看不见 -->
     <div id="scoreChart" style="width: 900px; height: 420px;"></div>
+
+    <h1>👥 用户活跃度分层</h1>
+    <div id="activityChart" style="width: 900px; height: 420px;"></div>
+
+    <h1>🎬 动漫类型分布</h1>
+    <div id="typeChart" style="width: 900px; height: 420px;"></div>
+
+    <h1>⭐ 评分 Top10</h1>
+    <div id="topChart" style="width: 900px; height: 420px;"></div>
+
+    <h1>🔥 热门动漫 Top20</h1>
+    <div id="hotChart" style="width: 900px; height: 700px;"></div>
+
+    <h1>📈 年度放送趋势(1980-2026)</h1>
+    <div id="trendChart" style="width: 900px; height: 420px;"></div>
 
     <script src="{% static 'echarts.min.js' %}"></script>
     <script>
@@ -22,6 +36,90 @@
             series: [{
                 type: 'bar',
                 data: scoreData.values
+            }]
+        });
+
+        // 图2 用户活跃度分层(饼图)
+        const activityData = JSON.parse('{{ activity_data|escapejs }}');
+
+        const pieData = activityData.labels.map((name, i) => ({
+            name: name,
+            value: activityData.values[i]
+        }));
+
+        const chart2 = echarts.init(document.getElementById('activityChart'));
+        chart2.setOption({
+            tooltip: {},
+            series: [{
+                type: 'pie',
+                radius: '60%',
+                data: pieData
+            }]
+        });
+
+        // 图3 动漫类型分布(横向条形图)
+        const typeData = JSON.parse('{{ type_data|escapejs }}');
+
+        const chart3 = echarts.init(document.getElementById('typeChart'));
+        chart3.setOption({
+            tooltip: {},
+            xAxis: { type: 'value' },
+            yAxis: { type: 'category', data: typeData.labels, inverse: true },
+            series: [{
+                type: 'bar',
+                data: typeData.values
+            }]
+        });
+
+        // 图4 评分Top10(横向条形图 + 数值标签)
+        const topData = JSON.parse('{{ top_data|escapejs }}');
+
+        const chart4 = echarts.init(document.getElementById('topChart'));
+        chart4.setOption({
+            tooltip: {},
+            grid: { left: 280, right: 60 },     // 左边留宽点，不然长名字被裁掉
+            xAxis: { type: 'value', min: 8, max: 10 },
+            yAxis: { type: 'category', data: topData.labels, inverse: true },
+            series: [{
+                type: 'bar',
+                data: topData.values,
+                label: { show: true, position: 'right' }    // 分数写在条的右边
+            }]
+        });
+
+        // 图5 热门动漫Top20(横向条形图，从0开始量)
+        const hotData = JSON.parse('{{ hot_data|escapejs }}');
+
+        const chart5 = echarts.init(document.getElementById('hotChart'));
+        chart5.setOption({
+            tooltip: {},
+            grid: {left: 300, right: 80},
+            xAxis: { type: 'value' },
+            yAxis: { type: 'category', data: hotData.labels, inverse: true},
+            series: [{
+                type: 'bar',
+                data: hotData.values,
+                label: { show: true, position: 'right' }
+            }]
+        });
+
+        // 图6 年度放送趋势(折线图，数值轴=真实时间距离)
+        const trendData = JSON.parse('{{ trend_data|escapejs }}');
+
+        // 拼成 [年份，数量] 坐标点; filter 筛掉"未知"(它不是年份)
+        const trendPoints = trendData.labels
+            .map((year, i) => [Number(year), trendData.values[i]])
+            .filter(p => !isNaN(p[0]));     // 只筛选"未知", 2026 保留
+
+        const chart6 = echarts.init(document.getElementById('trendChart'));
+        chart6.setOption({
+            tooltip: { trigger: 'axis' },   // 悬停时按 x 轴取点
+            xAxis: { type: 'value', min: 1980, max: 2030 },
+            yAxis: { type: 'value' },
+            series: [{
+                type: 'line',
+                data: trendPoints,
+                symbolSize: 6
             }]
         });
     </script>

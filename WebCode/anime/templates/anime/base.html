@@ -7,9 +7,10 @@
 <body>
     <!-- 导航栏: 全站公共的"旗杆"，每页都有 -->
      <nav>
-        <a href="/">🏠 首页</a>
-        <a href="/search/">🔍 搜索</a>
-        <a href="/rank/">🏆 排行榜</a>
+        <a href="{% url 'anime_list' %}">🏠 首页</a>
+        <a href="{% url 'anime_search' %}">🔍 搜索</a>
+        <a href="{% url 'anime_rank' %}">🏆 排行榜</a>
+        <a href="{% url 'anime_dashboard' %}">📊 数据大屏</a>
      </nav>
      <hr>
 
