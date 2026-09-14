@@ -3,6 +3,7 @@ from django.shortcuts import render, get_object_or_404  # 自动回复 404 未�
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.http import HttpResponse
 import os   # 借 os 工具 (操作系统接口)
+import json
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -49,4 +50,16 @@ def anime_search(request):      # 搜索
     keyword = request.GET.get("q", "")      # 拿用户输入，没输就空
     results = Anime.objects.filter(name__icontains=keyword)[:20] # 名字模糊索
     return render(request, "anime/search.html", {"results": results, "keyword": keyword})
+
+def anime_dashboard(request):
+    # 大屏数据: 预计算好的 JSON，脚本算一次，这里直接读
+    data_dir = os.path.join(BASE_DIR, "../../Spider/webdata")
+
+    with open(os.path.join(data_dir, "ratings/score_distribution.json"), encoding = "utf-8") as f:
+        score_data = json.load(f)
+
+    # 关键: dict 必须先变成 JSON 字符串才能交给模板
+    score_json = json.dumps(score_data, ensure_ascii = False)
+
+    return render(request, "anime/dashboard.html", {"score_data": score_json})
 # Create your views here.

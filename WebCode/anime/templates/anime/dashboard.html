@@ -1,0 +1,28 @@
+{% extends "anime/base.html" %}
+{% load static %}
+
+{% block title %}数据大屏{% endblock %}
+
+{% block content %}
+    <h1>📊 评分分布</h1>
+
+    <!-- ECharts 的"画布": 必须有宽高, 不然图会缩成 0 高看不见 -->
+    <div id="scoreChart" style="width: 900px; height: 420px;"></div>
+
+    <script src="{% static 'echarts.min.js' %}"></script>
+    <script>
+        // 从视图递过来的 JSON 字符串，这里已经是合法的 JS 对象了
+        const scoreData = JSON.parse('{{ score_data|escapejs }}');
+
+        const chart = echarts.init(document.getElementById('scoreChart'));
+        chart.setOption({
+            tooltip: {},
+            xAxis: { type: 'category', data: scoreData.labels },
+            yAxis: { type: 'value' },
+            series: [{
+                type: 'bar',
+                data: scoreData.values
+            }]
+        });
+    </script>
+{% endblock %}
