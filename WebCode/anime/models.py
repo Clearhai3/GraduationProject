@@ -23,6 +23,13 @@ class Anime(models.Model):
     cover_url = models.CharField(max_length=500, null=True, blank=True)
     detail_url = models.CharField(max_length=500, null=True, blank=True)
 
+    @property
+    def local_cover(self):
+        """本地封面路径(相对 static/) —— 数据库不动，渲染时把网上地址换成自家门牌"""
+        if self.cover_url and "lain.bgm.tv" in self.cover_url:
+            return f"images/anime/{self.subject_id}.jpg"
+        return "images/anime/no_icon_subject.png"       # 没真图的用兜底
+
     def __str__(self):
         return self.name 
     # 返回自己的名字
