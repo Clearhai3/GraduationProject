@@ -86,6 +86,16 @@ def anime_dashboard(request):
 
     trend_json = json.dumps(trend_data, ensure_ascii = False)
 
+    with open(os.path.join(data_dir, "users/active_users_top10.json"), encoding = "utf-8") as f:
+        active_users_data = json.load(f)
+
+    active_users_json = json.dumps(active_users_data, ensure_ascii = False)
+
+    with open(os.path.join(data_dir, "algorithms/algorithm_compare.json"), encoding = "utf-8") as f:
+        algorithm_data = json.load(f)
+
+    algorithm_json = json.dumps(algorithm_data, ensure_ascii = False)
+
     return render(request, "anime/dashboard.html", {
         "score_data": score_json,
         "activity_data": activity_json,
@@ -93,6 +103,8 @@ def anime_dashboard(request):
         "top_data": top_json,
         "hot_data": hot_json,
         "trend_data": trend_json,
+        "active_users_data": active_users_json,
+        "algorithm_data": algorithm_json,
     })
 
 # Create your views here.

@@ -23,6 +23,15 @@
     <h1>📈 年度放送趋势(1908-2026)</h1>
     <div id="trendChart" style="width: 900px; height: 420px;"></div>
 
+    <h1>👑 活跃用户 Top10</h1>
+    <div id="activeUserChart" style="width: 900px; height: 420px;"></div>
+
+    <h1>🏆 算法效果对比</h1>
+    <div style="display: flex; gap: 20px;">
+        <div id="itemcfChart" style="width: 440px; height: 420px;"></div>
+        <div id="alsChart" style="width: 440px; height: 420px;"></div>
+    </div>
+
     <script src="{% static 'echarts.min.js' %}"></script>
     <script>
         // 从视图递过来的 JSON 字符串，这里已经是合法的 JS 对象了
@@ -120,6 +129,53 @@
                 type: 'line',
                 data: trendPoints,
                 symbolSize: 6
+            }]
+        });
+
+        // 图7 活跃用户Top10(横向条形图，同图5写法)
+        const activeUserData = JSON.parse('{{ active_users_data|escapejs }}');
+
+        const chart7 = echarts.init(document.getElementById('activeUserChart'));
+        chart7.setOption({
+            tooltip: {},
+            grid: { left: 200, right: 80},
+            xAxis: { type: 'value' },
+            yAxis: { type: 'category', data: activeUserData.labels, inverse: true },
+            series: [{
+                type: 'bar',
+                data: activeUserData.values,
+                label: { show: true, position: 'right' }
+            }]
+        });
+
+        // 图8 算法效果对比(拆两张，因为量纲不同)
+        const algoData = JSON.parse('{{ algorithm_data|escapejs }}');
+
+        // 8-a: ItemCF，单位 %
+        const chart8a = echarts.init(document.getElementById('itemcfChart'));
+        chart8a.setOption({
+            title: { text: 'ItemCF 推荐效果(%)', left: 'center' },
+            tooltip: {},
+            xAxis: { type: 'category', data: algoData.itemcf.labels },
+            yAxis: { type: 'value' },
+            series: [{
+                type: 'bar',
+                data: algoData.itemcf.values,
+                label: { show: true, position: 'top' }
+            }]
+        });
+
+        // 8-b: ALS，单位 RMSE 分数(越低越好)
+        const chart8b = echarts.init(document.getElementById('alsChart'));
+        chart8b.setOption({
+            title: { text: 'ALS 评分预测(RMSE，越低越好)', left: 'center' },
+            tooltip: {},
+            xAxis: { type: 'category', data: algoData.als.labels },
+            yAxis: { type: 'value', min: 0},
+            series: [{
+                type: 'bar',
+                data: algoData.als.values,
+                label: { show: true, position: 'top' }
             }]
         });
     </script>
