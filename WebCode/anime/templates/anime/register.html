@@ -1,0 +1,15 @@
+{% extends "anime/base.html" %}
+
+{% block title %}注册 - Elarea AnimeProject{% endblock %}
+
+{% block content %}
+    <h2>注册</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">注册</button>
+    </form>
+
+    <p>已经有账号了？<a href="{% url 'user_login' %}">去登录</a></p>
+{% endblock %}

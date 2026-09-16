@@ -127,6 +127,11 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
+# 登录相关
+LOGIN_URL = "user_login"           # 未登录的人想进受保护页面
+LOGIN_REDIRECT_URL = "anime_list"  # 登录成功后默认去哪
+LOGOUT_REDIRECT_URL = "anime_list"  # 退出后去哪
+
 
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration

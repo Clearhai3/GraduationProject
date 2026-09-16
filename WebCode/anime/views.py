@@ -1,5 +1,7 @@
 from .models import Anime               # 导入你建的 Anime 模型
-from django.shortcuts import render, get_object_or_404  # 自动回复 404 未找到
+from django.shortcuts import render, redirect, get_object_or_404  # 自动回复 404 未找到
+from django.contrib.auth import authenticate, login, logout     # 登录三件套
+from django.contrib.auth.forms import UserCreationForm          # 注册表单(含加密)
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.http import HttpResponse
 import os   # 借 os 工具 (操作系统接口)
@@ -106,5 +108,40 @@ def anime_dashboard(request):
         "active_users_data": active_users_json,
         "algorithm_data": algorithm_json,
     })
+
+def user_register(request):
+    """注册 —— 表单帮我们把密码加密后入库"""
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)   # 把用户填的东西装进表单
+        if form.is_valid():                     # 表单自检: 密码够长吗/两次一样吗
+            user = form.save()                  # 存库(密码已加密)
+            login(request, user)                # 顺手登录
+            return redirect("anime_list")
+    else:
+        form = UserCreationForm()               # GET 请求 = 给一张空表
+
+    return render(request, "anime/register.html", {"form": form})
+
+def user_login(request):
+    """登录 —— 两步: 先验证正身，再发通行证"""
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        # 第一步: 验证正身 (查无此人 或 密码不对 -> 返回 None)
+        user = authenticate(request, username = username, password = password)
+
+        if user is not None:
+            login(request, user)                # 第二步: 发通行证(写 session)
+            return redirect("anime_list")
+
+        return render(request, "anime/login.html", {"error": "账号或密码不对"})
+
+    return render(request, "anime/login.html")
+
+def user_logout(request):
+    """退出 —— 撕掉通行证"""
+    logout(request)
+    return redirect("anime_list")
 
 # Create your views here.
