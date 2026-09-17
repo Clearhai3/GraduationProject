@@ -7,6 +7,7 @@ urlpatterns = [
     path("rank/", views.anime_rank, name="anime_rank"),
     path("search/", views.anime_search, name="anime_search"),
     path("dashboard/", views.anime_dashboard, name = "anime_dashboard"),
+    path("anime/<int:anime_id>/rate/", views.anime_rate, name="anime_rate"),
 
     # 登录系统
     path("register/", views.user_register, name = "user_register"),

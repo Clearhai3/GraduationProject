@@ -1,6 +1,7 @@
-from .models import Anime               # 导入你建的 Anime 模型
+from .models import Anime, UserRating               # 导入你建的 Anime 模型
 from django.shortcuts import render, redirect, get_object_or_404  # 自动回复 404 未找到
 from django.contrib.auth import authenticate, login, logout     # 登录三件套
+from django.contrib.auth.decorators import login_required       # 登录请求，用于登录后操作
 from django.contrib.auth.forms import UserCreationForm          # 注册表单(含加密)
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.http import HttpResponse
@@ -42,7 +43,32 @@ def anime_detail(request, anime_id):
                 break       # 找到就停
     # 新增结束
 
-    return render(request, "anime/detail.html", {"anime": anime, "similar_animes": similar_animes})
+    # 我在这页打的分: 没登录 / 没打过 -> 都是 None
+    my_rating = None
+    if request.user.is_authenticated:
+        my_rating = UserRating.objects.filter(user = request.user, anime = anime).first()
+
+    return render(request, "anime/detail.html", {
+        "anime": anime, 
+        "similar_animes": similar_animes, 
+        "score_range": range(1, 11),
+        "my_rating": my_rating,
+    })
+
+@login_required
+def anime_rate(request, anime_id):
+    anime = get_object_or_404(Anime, pk=anime_id)
+    raw = request.POST.get("rate", "")          
+    score = int(raw) if raw.isdigit() else 0    # 从表单里捞出分数
+
+    if 1 <= score <= 10:        
+        UserRating.objects.update_or_create(
+            user = request.user,
+            anime = anime,
+            defaults = {"rate": score},
+        )
+
+    return redirect("anime_detail", anime_id = anime_id)
 
 def anime_rank(request):        # 排行榜
     animes = Anime.objects.order_by("-rating")[:20]     # 评分倒叙，取前 20
