@@ -13,7 +13,7 @@
         <a href="{% url 'anime_dashboard' %}">📊 数据大屏</a>
 
         {% if user.is_authenticated %}
-            <span>👤 {{ user.username }}</span>
+            <a href="{% url 'user_profile' %}">👤 {{ user.username }}</a>
             <a href="{% url 'user_logout' %}">退出</a>
         {% else %}
             <a href="{% url 'user_login' %}">登录</a>

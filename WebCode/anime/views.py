@@ -70,6 +70,13 @@ def anime_rate(request, anime_id):
 
     return redirect("anime_detail", anime_id = anime_id)
 
+@login_required
+def user_profile(request):
+    # select_related = 联手把关联的动漫一起查回来 (避免 N+1 查询)
+    ratings = UserRating.objects.filter(user=request.user).select_related("anime")
+
+    return render(request, "anime/profile.html", {"ratings": ratings})
+
 def anime_rank(request):        # 排行榜
     animes = Anime.objects.order_by("-rating")[:20]     # 评分倒叙，取前 20
     return render(request, "anime/rank.html", {"animes": animes})

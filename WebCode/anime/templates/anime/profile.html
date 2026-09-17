@@ -1,0 +1,22 @@
+{% extends "anime/base.html" %}
+
+{% block title %}我的评分{% endblock %}
+
+{% block content %}
+    <h1>{{ user.username }} 的评分记录</h1>
+    
+    <p>共打了 <strong>{{ ratings|length }}</strong> 部</p>
+
+    {% if ratings %}
+        <ul>
+        {% for r in ratings %}
+            <li>
+                <a href="{% url 'anime_detail' r.anime.subject_id %}">{{ r.anime.name }}</a>
+                —— 我打了 <strong>{{ r.rate }}</strong> 分
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>还没打过分，去 <a href="{% url 'anime_list' %}">首页</a> 逛逛吧</p>
+    {% endif %}
+{% endblock %}

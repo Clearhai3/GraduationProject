@@ -13,4 +13,7 @@ urlpatterns = [
     path("register/", views.user_register, name = "user_register"),
     path("login/", views.user_login, name = "user_login"),
     path("logout/", views.user_logout, name = "user_logout"),
+
+    # 用户评分界面
+    path("profile/", views.user_profile, name = "user_profile"),
 ]
