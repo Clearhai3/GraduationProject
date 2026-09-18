@@ -1,9 +1,114 @@
 {% extends "anime/base.html" %}
+{% load static %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'cropper.min.css' %}">
+    <script src="{% static 'cropper.min.js' %}"></script>
+{% endblock %}
 
 {% block title %}我的评分{% endblock %}
 
 {% block content %}
     <h1>{{ user.username }} 的评分记录</h1>
+
+    {# —— 头像区 —— #}
+    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
+        {% if user.profile.avatar %}
+            <img src="{{ user.profile.avatar.url }}" alt="我的头像"
+                 style="width: 96px; height: 96px; border-radius: 50%; object-fit: cover;">
+        {% else %}
+            <div style="width: 96px; height: 96px; border-radius: 50%; background: #e5e7eb;
+                        color: #6b7280; font-size: 36px; display: flex;
+                        align-items: center; justify-content: center;">
+                {{ user.username|first }}
+            </div>
+        {% endif %}
+
+        <button type="button" id="pick-btn">选择图片</button>
+
+        {# 真正提交的表单 —— 藏在后面，用户看不见 #}
+        <form method="post" action="{% url 'user_avatar_upload' %}"
+              enctype="multipart/form-data" id="avatar-form">
+            {% csrf_token %}
+            <input type="file" name="avatar" id="avatar-file" accept="image/*" hidden>
+        </form>
+    </div>
+
+    {# —— 裁剪区 (默认藏起来，选完图才出现) —— #}
+    <div id="crop-panel" style="display: none; margin-bottom: 24px;">
+        <div style="display: flex; gap: 24px; align-items: flex-start;">
+            <div style="width: 420px;">
+                <img id="crop-image" style="max-width: 100%; display: block;">
+            </div>
+            <div>
+                <p style="color: #6b7280; font-size: 13px; margin: 0 0 8px;">预览</p>
+                <div id="crop-preview"
+                     style="width: 120px;height: 120px; border-radius: 50%;
+                     overflow: hidden; background: #f0f0f0;"></div>
+            </div>
+        </div>
+        <div style="margin-top: 12px; display: flex; gap: 8px;">
+            <button type="button" id="crop-confirm">确定</button>
+            <button type="button" id="crop-cancel">取消</button>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            const pickBtn   = document.getElementById('pick-btn');
+            const fileInput = document.getElementById('avatar-file');
+            const form      = document.getElementById('avatar-form');
+            const panel     = document.getElementById('crop-panel');
+            const cropImg   = document.getElementById('crop-image');
+
+            let cropper = null;
+            let objectUrl = null;
+
+            // 1. 点"选择图片" = 替用户去点那个看不见的 input
+            pickBtn.addEventListener('click', () => fileInput.click());
+
+            // 2. 选完图: 本地预览 -> 建裁剪框
+            fileInput.addEventListener('change', () => {
+                const file = fileInput.files[0];
+                if (!file) return;
+
+                if (objectUrl) URL.revokeObjectURL(objectUrl);  // 先回收上一张的地址
+                objectUrl = URL.createObjectURL(file);
+                cropImg.src = objectUrl;
+
+                cropImg.onload = () => {
+                    if (cropper) cropper.destroy();
+                    cropper = new Cropper(cropImg, {
+                        aspectRatio: 1,     // 锁死正方形
+                        viewMode: 1,        // 裁框不许超出图片
+                        dragMode: 'move',   // 拖的是图，不是框 (更像"移动照片")
+                        autoCropArea: 1,    // 一上来就铺满
+                        background: false,
+                        preview: '#crop-preview',
+                    });
+                    panel.style.display = 'block';
+                };
+            });
+
+            // 3. 取消
+            document.getElementById('crop-cancel').addEventListener('click', () => {
+                if (cropper) { cropper.destroy(); cropper = null; }
+                panel.style.display = 'none';
+                fileInput.value = '';       
+            });
+
+            // 4. 确定: 裁出 400x400 -> 塞回 input -> 提交
+            document.getElementById('crop-confirm').addEventListener('click', () => {
+                const canvas = cropper.getCroppedCanvas({ width: 400, height: 400});
+                canvas.toBlob((blob) => {
+                    const dt = new DataTransfer();
+                    dt.items.add(new File([blob], 'avatar.jpg', { type: 'image/jpeg' }));
+                    fileInput.files = dt.files;
+                    form.submit();
+                }, 'image/jpeg', 0.9);
+            });
+        })();
+    </script>
     
     <p>共打了 <strong>{{ ratings|length }}</strong> 部</p>
 

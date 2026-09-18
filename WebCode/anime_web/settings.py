@@ -127,6 +127,10 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
+# 用户上传的文件 (头像等) —— static 是你给的, media 是用户给的
+MEDIA_URL = 'media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 # 登录相关
 LOGIN_URL = "user_login"           # 未登录的人想进受保护页面
 LOGIN_REDIRECT_URL = "anime_list"  # 登录成功后默认去哪

@@ -16,4 +16,7 @@ urlpatterns = [
 
     # 用户评分界面
     path("profile/", views.user_profile, name = "user_profile"),
+
+    # 头像
+    path("avatar/upload", views.user_avatar_upload, name="user_avatar_upload"),
 ]

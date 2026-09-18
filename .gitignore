@@ -49,3 +49,5 @@ env/
 hadoop-3.3.6.tar.gz
 答辩备问手册.md
 
+# 用户上传的头像 (用户数据，服务器本地生成)
+WebCode/media/

@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 class Anime(models.Model):
     # 主键: Bangumi subject ID （从详情页 URL 抽出）
@@ -49,6 +50,38 @@ class Rating(models.Model):
 
     def __str__(self):
         return f"{self.user_id} 给 {self.anime} 打了 {self.rate}"
+
+class UserRating(models.Model):
+    """站内用户打分 —— 与 Rating(爬来的) 物理隔离"""
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE,
+        related_name="site_ratings", db_index=True,
+    )
+    anime = models.ForeignKey(
+        Anime, on_delete=models.CASCADE,
+        related_name="site_ratings", db_index=True,
+    )
+    rate = models.IntegerField()    # 1~10，站内打分必须是整数
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        # 同一个用户对同一部动漫只能有一条记录 —— 数据库层面强制
+        unique_together = ("user", "anime")
+
+    def __str__(self):
+        return f"{self.user.username} 给 《{self.anime.name}》打了 {self.rate} 分"
+
+class UserProfile(models.Model):
+    """站内用户的附加资料 —— 外挂在 auth_user 旁边，不碰 Django 的地基"""
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE,
+        related_name="profile",
+    )
+    avatar = models.ImageField(upload_to="avatars/", null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.user.username} 的资料"
 
 # Operations to perform:
 #   Apply all migrations: admin, anime, auth, contenttypes, sessions

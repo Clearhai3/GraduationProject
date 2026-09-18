@@ -1,14 +1,20 @@
-from .models import Anime, UserRating               # 导入你建的 Anime 模型
+from .models import Anime, UserRating, UserProfile               # 导入你建的 Anime 模型
 from django.shortcuts import render, redirect, get_object_or_404  # 自动回复 404 未找到
 from django.contrib.auth import authenticate, login, logout     # 登录三件套
 from django.contrib.auth.decorators import login_required       # 登录请求，用于登录后操作
 from django.contrib.auth.forms import UserCreationForm          # 注册表单(含加密)
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.http import HttpResponse
+from io import BytesIO                          # 内存里的"文件"
+from PIL import Image, ImageOps                 # 图片工具
+from django.core.files.base import ContentFile  # 把内存里的字节变成 Dajngo 认的文件
+from uuid import uuid4
 import os   # 借 os 工具 (操作系统接口)
 import json
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+AVATAR_SIZE = 400                       # 头像输出边长(px)
+AVATAR_MAX_UPLOAD = 5 * 1024 * 1024     # 允许上传的原始大小上限 5MB
 
 def anime_list(request):                # 函数名必须和 urls 里一致
     page_num = request.GET.get("page", 1)   # 前段要第几页，默认第 1 页
@@ -55,6 +61,36 @@ def anime_detail(request, anime_id):
         "my_rating": my_rating,
     })
 
+def _compress_avatar(uploaded):
+    """转正 -> 转 RGB -> 居中裁方 -> 缩到 400 -> 压缩 JPEG (全在内存里做) """
+    img = ImageOps.exif_transpose(Image.open(uploaded))     # 1. 按 EXIF 转正
+
+    # 2. 统一成 RGB: JPEG 村不了透明通道 / CMYK / 调色板
+    if img.mode != "RGB":
+        if img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info):
+            img = img.convert("RGBA")
+            bg = Image.new("RGB", img.size, {255, 255, 255})        # 铺一张白底
+            bg.paste(img, mask=img.split()[-1])                     # 用透明通道当蒙板贴上去
+            img = bg
+        else:
+            img = img.convert("RGB")
+
+    # 3. 居中裁成正方形
+    w, h = img.size
+    side = min(w, h)
+    left = (w - side) // 2
+    top = (h - side) // 2
+    img = img.crop((left, top, left + side, top + side))
+
+    # 4. 压缩到 400x400
+    img = img.resize((AVATAR_SIZE, AVATAR_SIZE), Image.Resampling.LANCZOS)
+
+    # 5. 压成 JPEG，写进内存 (不落临时文件)
+    buf = BytesIO()
+    img.save(buf, format="JPEG", quality=85, optimize=True)
+
+    return ContentFile(buf.getvalue())
+
 @login_required
 def anime_rate(request, anime_id):
     anime = get_object_or_404(Anime, pk=anime_id)
@@ -76,6 +112,21 @@ def user_profile(request):
     ratings = UserRating.objects.filter(user=request.user).select_related("anime")
 
     return render(request, "anime/profile.html", {"ratings": ratings})
+
+@login_required
+def user_avatar_upload(request):
+    """上传头像 —— 文件走 request.FILES, 不走 request.POST"""
+    f = request.FILES.get("avatar")
+    if request.method == "POST" and f and f.size <= AVATAR_MAX_UPLOAD:
+        new_file = _compress_avatar(f)      # 先压 (这步会失败，所以放最前)
+        # get_or_create: 老用户可能还没有资料记录，先给他开一份空的
+        profile, create = UserProfile.objects.get_or_create(user=request.user)
+        if profile.avatar:
+            profile.avatar.delete(save=False)   # 删掉旧文件，不在磁盘上留孤儿
+        profile.avatar.save(f"{request.user.id}_{uuid4().hex[:8]}.jpg", new_file, save=False)
+        profile.save()
+
+    return redirect("user_profile")
 
 def anime_rank(request):        # 排行榜
     animes = Anime.objects.order_by("-rating")[:20]     # 评分倒叙，取前 20
