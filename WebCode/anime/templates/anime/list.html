@@ -4,16 +4,10 @@
 
 {% block content %}
     <h1>动漫列表 (共 {{ total_count }} 部) </h1>
-    <table border="1">
-        <tr>
-            <th>名称</th>
-            <th>类型</th>
-            <th>评分</th>
-        </tr>
-        <tbody id="anime-rows">
-            {% include "anime/_rows.html" %}    <!-- 第 1 页的行 -->
-        </tbody>
-    </table>
+    
+    <div class="anime-grid" id="anime-grid">
+        {% include "anime/_rows.html" %}
+    </div>
     <p id="loading">加载中……</p>
     <p id="end" style="display: none;">🎉 已经到底啦，一共 {{ total_count }} 部，你都看完啦！</p>
 
@@ -45,7 +39,7 @@
                     return;
                 }
                 // 把新行追加到表格尾部 (不刷新页面！)
-                document.getElementById("anime-rows").insertAdjacentHTML("beforeend", html);
+                document.getElementById("anime-grid").insertAdjacentHTML("beforeend", html);
                 loading = false;        // 放行，允许下一次加载
             });
         }

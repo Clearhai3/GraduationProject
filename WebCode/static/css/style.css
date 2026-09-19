@@ -1,0 +1,131 @@
+/* 
+    Elarea AnimeProject —— 全站样式
+    设计依据: design/Web样式设计.md
+ */
+
+ /* 1. 变量: 改这里 = 改全站 */
+:root {
+    --bg:      #ffffff; /* 背景: 纯白，让封面说话 */ 
+    --text:    #1f2328; /* 正文: 近黑 (纯黑在白底上太硬) */
+    --muted:   #6b7280; /* 次要文字: 标签、表头 */
+    --primary: #2b6cb0; /* 主色: 深海蓝 (只用于 链接/强调数字/hover) */
+    --border:  #e5e7eb; /* 分隔线: 极浅灰 */
+    --gutter:    32px;
+}
+
+/* 2. 基础重置 */
+* { box-sizing: border-box; }   /* 宽度包含 padding 和 border */
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                 "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC",
+                 "Microsoft YaHei", sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+/* 字号只准三种: 20 标题 / 15 正文 / 13 小注 */
+h1 { font-size: 20px; font-weight: 600; margin: 24px 0 16px; }
+h2 { font-size: 15px; font-weight: 600; margin: 32px 0 12px; }
+
+a { color: var(--primary); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+img { display: block; max-width: 100%; }
+
+/* 3. 容器: 1200px 居中 */
+.container {
+    max-width: none;
+    margin: 0;
+    padding: 0 var(--gutter);
+}
+
+/* 4. 顶部导航 */
+nav { border-bottom: 1px solid var(--border); }
+
+.nav-inner {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    height: 56px;
+}
+
+.logo {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: 0.5px;
+}
+.logo:hover { text-decoration: none; }
+
+.nav-links {
+    margin-left: auto;      /* 吃掉左边所有空隙 -> 把链接推到最右 */
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+.nav-links a { color: var(--text); }
+.nav-links a:hover { color: var(--primary); text-decoration: none; }
+
+/* 5. 表格: 排行榜 / 搜索结果 */
+table { width: 100%; border-collapse: collapse; }
+
+th, td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+th {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+}
+
+/* 6. 动漫卡片网格 */
+.anime-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 24px;
+    margin: 24px 0 48px;
+}
+
+.card { display: block; color: var(--text); }
+.card:hover { text-decoration: none; }
+
+.card-cover {
+    width: 100%;
+    aspect-ratio: 2 / 3;    /* 统一 2:3 —— 网格"齐"的唯一秘诀 */
+    object-fit: cover;      /* 裁掉多余部分，不拉伸变形 */
+    border-radius: 8px;
+    background: #f3f4f6;  /* 图还没加载出来时的灰底 */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card:hover .card-cover {
+    transform: translateY(-4px);        /* 微微上浮 */
+    box-shadow: 0 8px 20px rbga(0, 0, 0, 0.12);
+}
+
+.card-title {
+    margin-top: 10px;
+    font-size: 15px;
+    line-height: 1.4;
+    display: -webkit-box;       /* 标题最多两行，超了省略号 */
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.card-meta {
+    margin-top: 4px;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.card-score {
+    color: var(--primary);      /* 蓝色: 强调数字 */
+    font-weight: 600;  
+}

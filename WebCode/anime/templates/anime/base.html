@@ -1,29 +1,33 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Bangumi 动漫推荐系统{% endblock %}</title>
+    <title>{% block title %}Elarea AnimeProject{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
     {% block extra_head %}{% endblock %}
 </head>
 <body>
-    <!-- 导航栏: 全站公共的"旗杆"，每页都有 -->
-     <nav>
-        <a href="{% url 'anime_list' %}">🏠 首页</a>
-        <a href="{% url 'anime_search' %}">🔍 搜索</a>
-        <a href="{% url 'anime_rank' %}">🏆 排行榜</a>
-        <a href="{% url 'anime_dashboard' %}">📊 数据大屏</a>
+    <nav>
+        <div class="container nav-inner">
+            <a href="{% url 'anime_list' %}" class="logo">Elarea AnimeProject</a>
+            <div class="nav-links">
+                <a href="{% url 'anime_search' %}">搜索</a>
+                <a href="{% url 'anime_rank' %}">排行榜</a>
+                <a href="{% url 'anime_dashboard' %}">数据大屏</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'user_profile' %}">{{ user.username }}</a>
+                    <a href="{% url 'user_logout' %}">退出</a>
+                {% else %}
+                    <a href="{% url 'user_login' %}">登录</a>
+                    <a href="{% url 'user_register' %}">注册</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
 
-        {% if user.is_authenticated %}
-            <a href="{% url 'user_profile' %}">👤 {{ user.username }}</a>
-            <a href="{% url 'user_logout' %}">退出</a>
-        {% else %}
-            <a href="{% url 'user_login' %}">登录</a>
-            <a href="{% url 'user_register' %}">注册</a>
-        {% endif %}
-     </nav>
-     <hr>
-
-     <!-- 货舱位: 每个页面填自己的内容 -->
-    {% block content %}{% endblock %}
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
 </body>
 </html>

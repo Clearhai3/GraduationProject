@@ -1,7 +1,11 @@
+{% load static %}
 {% for a in page %}
-<tr>
-    <td><a href="/anime/{{ a.subject_id }}">{{ a.name }}</a></td>
-    <td>{{ a.name_type }}</td>
-    <td>{{ a.rating }}</td>
-</tr>
+<a class="card" href="/anime/{{ a.subject_id }}">
+    <img class="card-cover" src="{% static a.local_cover %}" alt="{{ a.name }}" loading="lazy">
+    <div class="card-title">{{ a.name }}</div>
+    <div class="card-meta">
+        <span class="card-score">{{ a.rating }}</span>
+        <span>{{ a.anime_type }}</span>
+    </div>
+</a>
 {% endfor %}
