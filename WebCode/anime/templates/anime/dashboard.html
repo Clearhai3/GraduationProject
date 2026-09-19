@@ -6,30 +6,30 @@
 {% block content %}
     <h1>📊 评分分布</h1>
     <!-- ECharts 的"画布": 必须有宽高, 不然图会缩成 0 高看不见 -->
-    <div id="scoreChart" style="width: 900px; height: 420px;"></div>
+    <div id="scoreChart" class="chart-box"></div>
 
     <h1>👥 用户活跃度分层</h1>
-    <div id="activityChart" style="width: 900px; height: 420px;"></div>
+    <div id="activityChart" class="chart-box"></div>
 
     <h1>🎬 动漫类型分布</h1>
-    <div id="typeChart" style="width: 900px; height: 420px;"></div>
+    <div id="typeChart" class="chart-box"></div>
 
     <h1>⭐ 评分 Top10</h1>
-    <div id="topChart" style="width: 900px; height: 420px;"></div>
+    <div id="topChart" class="chart-box"></div>
 
     <h1>🔥 热门动漫 Top20</h1>
-    <div id="hotChart" style="width: 900px; height: 700px;"></div>
+    <div id="hotChart" class="chart-box chart-box-tall"></div>
 
     <h1>📈 年度放送趋势(1908-2026)</h1>
-    <div id="trendChart" style="width: 900px; height: 420px;"></div>
+    <div id="trendChart" class="chart-box"></div>
 
     <h1>👑 活跃用户 Top10</h1>
-    <div id="activeUserChart" style="width: 900px; height: 420px;"></div>
+    <div id="activeUserChart" class="chart-box"></div>
 
     <h1>🏆 算法效果对比</h1>
-    <div style="display: flex; gap: 20px;">
-        <div id="itemcfChart" style="width: 440px; height: 420px;"></div>
-        <div id="alsChart" style="width: 440px; height: 420px;"></div>
+    <div class="chart-pair">
+        <div id="itemcfChart"></div>
+        <div id="alsChart"></div>
     </div>
 
     <script src="{% static 'echarts.min.js' %}"></script>
@@ -177,6 +177,17 @@
                 data: algoData.als.values,
                 label: { show: true, position: 'top' }
             }]
+        });
+
+        // 窗口变化时，让所有图跟着重新量尺寸
+        const allCharts = [chart, chart2, chart3, chart4, chart5, chart6, chart7, chart8a, chart8b]
+
+        let resizeTimer = null;
+        window.addEventListener("resize", function() {
+            clearTimeout(resizeTimer);                  // 取消上一次还没跑的
+            resizeTimer = setTimeout(function () {      // 等用户停手 200ms 再干活
+                allCharts.forEach(c => c.resize());
+            }, 200);
         });
     </script>
 {% endblock %}
