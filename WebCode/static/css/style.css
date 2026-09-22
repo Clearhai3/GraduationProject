@@ -136,12 +136,16 @@ th {
 /* 7. 图表容器 */
 .chart-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));   
     gap: 24px;
     margin: 24px 0 48px;
 }
+.chart-grid > div {
+    min-width: 0;
+}
 .chart-box {
-    height: 380px;      
+    height: 380px;
+    overflow: hidden;      
 }
 
 .chart-wide {
