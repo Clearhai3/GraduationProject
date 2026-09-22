@@ -10,6 +10,9 @@
     --muted:   #6b7280; /* 次要文字: 标签、表头 */
     --primary: #2b6cb0; /* 主色: 深海蓝 (只用于 链接/强调数字/hover) */
     --border:  #e5e7eb; /* 分隔线: 极浅灰 */
+    --axis:    #9ca3af; /* 图表坐标轴灰 (比 --muted 浅一档) */
+    --chart-ink:#272727; /* 图表主色: 柱子/折线 (纯中性黑，不带蓝调) */
+    --placeholder:#f3f4f6; /* 图片未加载时的占位灰底 */
     --gutter:    32px;
 }
 
@@ -100,13 +103,13 @@ th {
     width: 100%;
     aspect-ratio: 2 / 3;    /* 统一 2:3 —— 网格"齐"的唯一秘诀 */
     object-fit: cover;      /* 裁掉多余部分，不拉伸变形 */
-    border-radius: 8px;
-    background: #f3f4f6;  /* 图还没加载出来时的灰底 */
+    border-radius: 8px;     /* 圆角 */
+    background: var(--placeholder);  /* 图还没加载出来时的灰底 */
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 .card:hover .card-cover {
     transform: translateY(-4px);        /* 微微上浮 */
-    box-shadow: 0 8px 20px rbga(0, 0, 0, 0.12);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
 }
 
 .card-title {
