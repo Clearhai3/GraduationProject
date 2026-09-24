@@ -61,138 +61,8 @@
     </div>
 
     <script src="{% static 'echarts.min.js' %}"></script>
+    <script src="{% static 'js/chart-common.js' %}"></script>
     <script>
-        // 公共皮肤: 八张图共用
-        // ECharts 是 JS，读不到 CSS 变量 —— 只能现场从 CSS 里"取"一次
-        // 第二个参数是兜底: CSS 里没这个变量时用默认色，免得静默变黑
-        const CSSVar = (name, fallback) => 
-            getComputedStyle(document.documentElement)
-                .getPropertyValue(name).trim() || fallback;
-
-        const INK = CSSVar('--text',          '#1f2328');    // 文字色 (tooltip 用)
-        const MUTED = CSSVar('--muted',       '#6b7280');    // 次要灰
-        const AXIS = CSSVar('--axis',         '#9ca3af');    // 坐标轴
-        const BAR_INK = CSSVar('--chart-ink', '#272727');    // 柱子/折线
-        const AXIS_W = 1.5;
-        const RAMP_FROM = '#e2e2e2';        // 最浅 (最少的那一档)
-        const RAMP_TO = '#4a4a4a';          // 最深 (最多的那一档) 
-
-        // 灰阶生成器: 给两个端点和档数，自动插值出中间色
-        const grayRamp = (n, from = RAMP_FROM, to = RAMP_TO) => {
-            if (n <= 1) return [to];
-            const hex = (h) => parseInt(h, 16);
-            const rgb = (h) => [hex(h.slice(1, 3)), hex(h.slice(3, 5)), hex(h.slice(5, 7))];
-            const [r1, g1, b1] = rgb(from);
-            const [r2, g2, b2] = rgb(to);
-            return Array.from({ length: n }, (_, i) => {
-                const t = i / (n - 1);      // 0 -> 1 均匀取 n 个点
-                const mix = (a, b) => Math.round(a + (b - a) * t);
-                return `rgb(${mix(r1, r2)}, ${mix(g1, g2)}, ${mix(b1, b2)})`;
-            });
-        };
-
-        // 字号随卡片大小缩放
-        // 基准: 卡片 344px 宽 -> 字号 10px; 限制在 8~12 之间
-        const fontFor = (w) => Math.max(8, Math.min(12, Math.round(w / 34.4)));
-
-        function rescaleFonts() {
-            const w = document.querySelector('.chart-plot').getBoundingClientRect().width;
-            const fs = fontFor(w);
-            allCharts.forEach(c => {
-                const opt = c.getOption();
-                const patch = {
-                    textStyle: { fontSize: fs },
-                    series: [{ label: {fontSize: fs} }],
-                };
-                if (opt.xAxis && opt.xAxis.length) {
-                    patch.xAxis = { axisLabel: { fontSize: fs } };
-                    patch.yAxis = { axisLabel: { fontSize: fs } };
-                }
-                c.setOption(patch);
-            });
-        }
-
-        // 每个 setOption 前面加 ...BASE，就是"套上皮肤"
-        const BASE = {
-            animationDuration: 400,
-            animationEasing: 'cubicOut',
-            textStyle: { 
-                color: MUTED, 
-                fontSize: 10 
-            },
-            tooltip: {
-                backgroundColor: CSSVar('--bg', '#ffffff'),
-                borderColor: CSSVar('--border', '#e5e7eb'),
-                textStyle: { color: INK, fontSize: 13 },
-                confine: true
-            }
-        };
-
-        // 大数字缩写成"万"
-        const WAN = (v) => v >= 10000 ? (v / 10000).toFixed(1) + '万' : v;
-
-        // 数值轴 (y 轴或横向图的 x 轴) : 删掉轴线和刻度，只留淡横线
-        const VALUE_AXIS = {
-            type: 'value',
-            axisLine: { 
-                show: true, 
-                lineStyle: { color: AXIS, width: AXIS_W} 
-            },
-            axisTick: { 
-                show: false 
-            },
-            axisLabel: { 
-                color: MUTED, 
-                formatter: WAN 
-            },
-            splitLine: { 
-                show: false 
-            }
-        };
-
-        // 类目轴 (动漫名/评分档) : 无轴线、无刻度、无竖线
-        const CAT_AXIS = {
-            type: 'category',
-            axisLine: { 
-                show: true, 
-                lineStyle: { color: AXIS, width: AXIS_W} 
-            },
-            axisTick: { 
-                show: false 
-            },
-            axisLabel: { 
-                color: MUTED 
-            },
-            splitLine: { 
-                show: false 
-            },
-        }
-
-        // 柱子: 统一中性黑、圆角、不描边
-        const BAR = {
-            type: 'bar',
-            itemStyle: { 
-                color: BAR_INK, 
-                borderRadius: [4, 4, 0, 0] 
-            },
-            label: { 
-                show: true, 
-                position: 'top', 
-                color: MUTED, 
-                fontSize: 10, 
-                formatter: (p) => WAN(p.value) 
-            }
-        };
-
-        // 横条图专用: 柱子向右长，数字要贴右边 (不是 top)
-        const HBAR = {
-            ...BAR,
-            label: {
-                ...BAR.label,
-                position: 'right'
-            }
-        }
-
         // 从视图递过来的 JSON 字符串，这里已经是合法的 JS 对象了
         const scoreData = JSON.parse('{{ score_data|escapejs }}');
 
@@ -383,7 +253,15 @@
             },
             tooltip: {
                 ...BASE.tooltip,
-                trigger: 'axis'
+                trigger: 'axis',
+                axisPointer: {
+                    snap: true
+                },
+                formatter: (parmas) => {
+                    if (!parmas || !parmas.length) return '';
+                    const [year, count] = parmas[0].value;
+                    return `${Math.round(year)} 年 ${count} 部`;
+                }
             },
             xAxis: { 
                 ...VALUE_AXIS,
@@ -500,7 +378,7 @@
             resizeTimer = setTimeout(function () {      // 等用户停手 200ms 再干活
                 requestAnimationFrame(function () {
                     allCharts.forEach(c => c.resize());
-                    rescaleFonts();
+                    rescaleFonts(allCharts);
                 });
             }, 200);
         });
