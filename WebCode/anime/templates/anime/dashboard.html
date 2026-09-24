@@ -5,59 +5,60 @@
 
 {% block content %}
     <div class="chart-grid">
-        <div class="chart-card">
+        
+        <a class="chart-card" href="{% url 'anime_chart_detail' 'score' %}">
             <div class="chart-title">评分分布</div>
             <div id="scoreChart" class="chart-plot"></div>
             <div class="chart-meta">10 档 · 峰值 7 分 75.3万，8 分 71.0万</div>
-        </div>
+        </a>
 
-        <div class="chart-card">
+        <a class="chart-card" href="{% url 'anime_chart_detail' 'activity' %}">
             <div class="chart-title">用户活跃度分层</div>
             <div id="activityChart" class="chart-plot"></div>
             <div class="chart-meta">6120 人 (59.4%) 评分超 100 条</div>
-        </div>
+        </a>
 
-        <div class="chart-card">
+        <a class="chart-card" href="{% url 'anime_chart_detail' 'type' %}">
             <div class="chart-title">动漫类型分布</div>
             <div id="typeChart" class="chart-plot"></div>
             <div class="chart-meta">TV 2412 部 · 占全库 48.2%</div>
-        </div>
+        </a>
 
-        <div class="chart-card">
+        <a class="chart-card" href="{% url 'anime_chart_detail' 'trend' %}">
             <div class="chart-title">年度放送趋势</div>
             <div id="trendChart" class="chart-plot"></div>
             <div class="chart-meta">1908-2026 · 249 部无日期未计</div>
-        </div>
+        </a>
 
-        <div class="chart-card">
+        <a class="chart-card" href="{% url 'anime_chart_detail' 'top' %}">
             <div class="chart-title">评分 Top10</div>
             <div id="topChart" class="chart-plot"></div>
             <div class="chart-meta">榜首 攻壳机动队 S.A.C. 2nd GIG · 9.2 分</div>
-        </div>
+        </a>
 
-        <div class="chart-card">
+        <a class="chart-card" href="{% url 'anime_chart_detail' 'hot' %}">
             <div class="chart-title">热门动漫 Top10</div>
             <div id="hotChart" class="chart-plot"></div>
             <div class="chart-meta">榜首 孤独摇滚！· 6055 人评分</div>
-        </div>
+        </a>
 
-        <div class="chart-card">
+        <a class="chart-card" href="{% url 'anime_chart_detail' 'active_users' %}">
             <div class="chart-title">活跃用户 Top10</div>
             <div id="activeUserChart" class="chart-plot"></div>
             <div class="chart-meta">榜首 用户 #10067 · 3494 条</div>
-        </div>
+        </a>
 
-        <div class="chart-card">
+        <a class="chart-card" href="{% url 'anime_chart_detail' 'itemcf' %}">
             <div class="chart-title">ItemCF 推荐效果</div>
             <div id="itemcfChart" class="chart-plot"></div>
             <div class="chart-meta">Recall@10 14.75% · 随机基线的 74 倍</div>
-        </div>
+        </a>
 
-        <div class="chart-card">
+        <a class="chart-card" href="{% url 'anime_chart_detail' 'als' %}">
             <div class="chart-title">ALS 评分预测</div>
             <div id="alsChart" class="chart-plot"></div>
             <div class="chart-meta">RMSE 0.9827 · 比基准提升 26.97%</div>
-        </div>
+        </a>
     </div>
 
     <script src="{% static 'echarts.min.js' %}"></script>

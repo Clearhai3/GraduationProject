@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate, login, logout     # 登录三件�
 from django.contrib.auth.decorators import login_required       # 登录请求，用于登录后操作
 from django.contrib.auth.forms import UserCreationForm          # 注册表单(含加密)
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from io import BytesIO                          # 内存里的"文件"
 from PIL import Image, ImageOps                 # 图片工具
 from django.core.files.base import ContentFile  # 把内存里的字节变成 Dajngo 认的文件
@@ -15,6 +15,64 @@ import json
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 AVATAR_SIZE = 400                       # 头像输出边长(px)
 AVATAR_MAX_UPLOAD = 5 * 1024 * 1024     # 允许上传的原始大小上限 5MB
+CHART_PAGES = {
+    "score": {
+        "file": "ratings/score_distribution.json", 
+        "kind": "bar",
+        "title": "评分分布", 
+        "sub": "全部 2,253,532 条评分，按 1~10 分十档统计"
+    },
+    "activity": {
+        "file": "users/user_activity.json", 
+        "kind": "pie",
+        "title": "用户活跃度分层", 
+        "sub": "10,303 位用户, 按评分条数分四档"
+    },
+    "type": {
+        "file": "anime/type_distribution.json",
+        "kind": "hbar",
+        "title": "动漫类型分布", 
+        "sub": "5,009 部作品的播放形式"
+    },
+    "trend": {
+        "file": "anime/yearly_trend.json", 
+        "kind": "line",
+        "title": "年度放送趋势", 
+        "sub": "1908~2026 · 249 部无日期未计"
+    },
+    "top": {
+        "file": "anime/rating_top10.json",
+        "kind": "hbar",
+        "title": "评分 Top10", 
+        "sub": "按 Bangumi 平均分排序"
+    },
+    "hot": {
+        "file": "anime/hot_anime_top20.json",
+        "kind": "hbar",
+        "title": "热门动漫 Top20",
+        "sub": "按评分人数排序 (全站热度)"
+    },
+    "active_users": {
+        "file": "users/active_users_top10.json",
+        "kind": "hbar",
+        "title": "活跃用户 Top10",
+        "sub": "样本内评分条数最多的用户"
+    },
+    "itemcf": {
+        "file": "algorithms/algorithm_compare.json",
+        "kind": "bar",
+        "pick": "itemcf",
+        "title": "ItemCF 推荐效果",
+        "sub": "留一法评估 · 随机基线 0.20%"
+    },
+    "als": {
+        "file": "algorithms/algorithm_compare.json",
+        "kind": "bar",
+        "pick": "als",
+        "title": "ALS 评分预测",
+        "sub": "RMSE 越低越好 · 基准 1.3456"
+    },
+}
 
 def anime_list(request):                # 函数名必须和 urls 里一致
     page_num = request.GET.get("page", 1)   # 前段要第几页，默认第 1 页
@@ -191,6 +249,28 @@ def anime_dashboard(request):
         "trend_data": trend_json,
         "active_users_data": active_users_json,
         "algorithm_data": algorithm_json,
+    })
+
+def anime_chart_detail(request, name):
+    # 单图页: 九张图共用着一个视图，差异全部查登记表
+    cfg = CHART_PAGES.get(name)
+    if cfg is None:
+        raise Http404
+
+    data_dir = os.path.join(BASE_DIR, "../../Spider/webdata")
+
+    with open(os.path.join(data_dir, cfg["file"]), encoding = "utf-8") as f:
+        chart_data = json.load(f)
+
+    # algorithm_compare.json 里装着两组，取走这一页要的那组
+    if "pick" in cfg:
+        chart_data = chart_data[cfg["pick"]]
+
+    return render(request, "anime/chart_detail.html", {
+        "title": cfg["title"],
+        "sub": cfg["sub"],
+        "kind": cfg["kind"],
+        "chart_data": json.dumps(chart_data, ensure_ascii=False),
     })
 
 def user_register(request):

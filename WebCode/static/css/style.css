@@ -143,11 +143,14 @@ th {
     gap: 20px;
     margin: 24px auto 48px;
 }
-.chart-grid > div {
+.chart-grid > * {
     min-width: 0;
 }
 
 .chart-card {
+    display: block;
+    color: var(--text);
+    text-decoration: none;
     background: #fff;
     border: 1px solid var(--border);
     border-radius: 8px;
@@ -158,6 +161,7 @@ th {
 .chart-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    text-decoration: none;
 }
 
 .chart-plot {
@@ -174,5 +178,32 @@ th {
 .chart-meta {
     padding: 0 11px 10px;
     font-size: 11px;
+    color: var(--muted);
+}
+
+.detail-sub {
+    margin: 0 0 20px;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.chart-detail {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    min-width: 0;
+}
+.chart-detail-plot {
+    width: 100%;
+    height: 560px;
+    min-width: 0;
+    overflow: hidden;
+}
+
+/* 预留: 图表说明区 (内容待定，先占位) */
+.chart-notes {
+    margin-top: 20px;
+    font-size: 13px;
     color: var(--muted);
 }
