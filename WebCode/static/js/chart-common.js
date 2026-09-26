@@ -54,6 +54,11 @@ function rescaleFonts(charts) {
     });
 }
 
+// 建图统一入口: 给 2 倍像素密度
+function initChart(dom) {
+    return echarts.init(dom, null, { devicePixelRatio: 2 });
+}
+
 // 每个setOption 前面加 ...BASE，就是"套上皮肤"
 const BASE = {
     animationDuration: 400,

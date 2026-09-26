@@ -6,28 +6,32 @@
     <title>{% block title %}Elarea AnimeProject{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     {% block extra_head %}{% endblock %}
+    <script src="{% static 'js/page-zoom.js' %}"></script>
 </head>
 <body>
-    <nav>
-        <div class="container nav-inner">
-            <a href="{% url 'anime_list' %}" class="logo">Elarea AnimeProject</a>
-            <div class="nav-links">
-                <a href="{% url 'anime_search' %}">搜索</a>
-                <a href="{% url 'anime_rank' %}">排行榜</a>
-                <a href="{% url 'anime_dashboard' %}">数据大屏</a>
-                {% if user.is_authenticated %}
-                    <a href="{% url 'user_profile' %}">{{ user.username }}</a>
-                    <a href="{% url 'user_logout' %}">退出</a>
-                {% else %}
-                    <a href="{% url 'user_login' %}">登录</a>
-                    <a href="{% url 'user_register' %}">注册</a>
-                {% endif %}
+    <div id="page-zoom">
+        <nav>
+            <div class="container nav-inner">
+                <a href="{% url 'anime_list' %}" class="logo">Elarea AnimeProject</a>
+                <div class="nav-links">
+                    <a href="{% url 'anime_search' %}">搜索</a>
+                    <a href="{% url 'anime_rank' %}">排行榜</a>
+                    <a href="{% url 'anime_dashboard' %}">数据大屏</a>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'user_profile' %}">{{ user.username }}</a>
+                        <a href="{% url 'user_logout' %}">退出</a>
+                    {% else %}
+                        <a href="{% url 'user_login' %}">登录</a>
+                        <a href="{% url 'user_register' %}">注册</a>
+                    {% endif %}
+                </div>
             </div>
-        </div>
-    </nav>
+        </nav>
 
-    <main class="container">
-        {% block content %}{% endblock %}
-    </main>
+        <main class="container">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
 </body>
 </html>

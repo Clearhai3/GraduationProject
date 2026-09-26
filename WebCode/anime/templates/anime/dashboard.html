@@ -4,7 +4,7 @@
 {% block title %}数据大屏{% endblock %}
 
 {% block content %}
-    <div class="chart-grid">
+    <div class="chart-grid" data-zoom-fit="4">
         
         <a class="chart-card" href="{% url 'anime_chart_detail' 'score' %}">
             <div class="chart-title">评分分布</div>
@@ -382,6 +382,12 @@
                     rescaleFonts(allCharts);
                 });
             }, 200);
+        });
+
+        // 整页缩放变化 -> 立刻重绘 (不等 200ms 防抖，否则图会慢半拍)
+        window.addEventListener("pagezoom", function () {
+            allCharts.forEach(c => c.resize());
+            rescaleFonts(allCharts);
         });
     </script>
 {% endblock %}

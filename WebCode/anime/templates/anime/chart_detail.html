@@ -200,5 +200,6 @@
 
         detail.setOption(option);
         window.addEventListener("resize", () => detail.resize());
+        window.addEventListener("pagezoom", () => detail.resize());
     </script>
 {% endblock %}
