@@ -19,6 +19,10 @@
 /* 2. 基础重置 */
 * { box-sizing: border-box; }   /* 宽度包含 padding 和 border */
 
+/* 关掉滚动锚定: 顶栏收起是文档变矮，浏览器会偷偷把 scrollY 往回退, 
+   退了就又掉回展开阈值 -> 反复跳。关掉它就断了这个回路。 */
+html { overflow-anchor: none; }
+
 body {
     width: 100%;
     min-width: 1152px;
@@ -50,7 +54,13 @@ img { display: block; max-width: 100%; }
 }
 
 /* 4. 顶部导航 */
-nav { border-bottom: 1px solid var(--border); }
+nav { 
+    position: sticky;       /* 1. 滚动顶就别走 */
+    top: 0;                 
+    z-index: 100;           /* 2. 压在内容上面 */
+    background: var(--bg);  /* 3. 不透光! 不写它内容会从底下穿过来 */
+    border-bottom: 1px solid var(--border); 
+}
 
 .nav-inner {
     display: flex;
@@ -73,8 +83,102 @@ nav { border-bottom: 1px solid var(--border); }
     gap: 20px;
     align-items: center;
 }
-.nav-links a { color: var(--text); }
-.nav-links a:hover { color: var(--primary); text-decoration: none; }
+.nav-links a { 
+    color: var(--text); 
+}
+.nav-links a:hover { 
+    color: var(--primary); 
+    text-decoration: none; 
+}
+
+/* 4.1 首页英雄区 (展开态) —— nav 里长出来的一块 */
+.hero {
+    display: flex;
+    align-items: center;
+    height: 160px;          /* 固定高: 按下不表，只给它留出这么大地方 */
+    padding-left: 136px;    /* 112 / 24 —— 让文字避开绝对定位的头像 */
+    overflow: hidden;       /* 收起时把文字裁掉，不让它撑高 */
+    transition: height 0.3s ease, padding 0.3s ease;
+}
+
+.hero-avatar {
+    position: absolute;         /* <- 脱离文档流，所以它不受 .hero 高度影响 */
+    left: var(--gutter);        /* 跟 Elarea 左对齐 */
+    top: 80px;                  /* 展开: 顶栏 56 + 24 */
+    width: 112px;
+    height: 112px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--placeholder);
+    color: var(--muted);
+    font-size: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: top 0.3s ease, left 0.3s ease,
+                width 0.3s ease, height 0.3s ease, font-size 0.3s ease;
+}
+.hero-avatar:hover {
+    text-decoration: none;
+}
+.hero-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.hero-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.hero-id {
+    font-size: 13px;
+    color: var(--muted);
+    margin: 0;
+}
+
+.hero-welcome {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 2px 0;
+}
+.hero-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin: 0;
+}
+.hero-quote {
+    font-size: 13px;
+    color: var(--muted);
+    font-style: italic;
+    margin: 6px 0 0;
+}
+
+/* 4.2 收起态: 往下滚时，英雄区缩成顶栏的一小条 */
+.hero, .hero-avatar, .hero-info {
+    transition: padding 0.3s ease, width 0.3s ease, height 0.3s ease,
+                font-size 0.3s ease, opacity 0.3s ease;
+}
+
+body.scrolled .hero { 
+    height: 0; 
+    padding-left: 0; 
+}
+body.scrolled .hero-avatar { 
+    top: 10px; 
+    width: 36px;
+    height: 36px;
+    font-size: 16px;  
+}
+body.scrolled .hero-info { 
+    opacity: 0; 
+}
+body.scrolled .logo {
+    margin-left: 48px;  /* 36 + 12 —— 给头像让位，Elarea 往右 */
+}
 
 /* 5. 表格: 排行榜 / 搜索结果 */
 table { width: 100%; border-collapse: collapse; }

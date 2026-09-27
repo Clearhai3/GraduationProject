@@ -8,7 +8,7 @@
     {% block extra_head %}{% endblock %}
     <script src="{% static 'js/page-zoom.js' %}"></script>
 </head>
-<body>
+<body class="{% if request.path != '/' %}scrolled{% endif %}">
     <div id="page-zoom">
         <nav>
             <div class="container nav-inner">
@@ -18,12 +18,38 @@
                     <a href="{% url 'anime_rank' %}">排行榜</a>
                     <a href="{% url 'anime_dashboard' %}">数据大屏</a>
                     {% if user.is_authenticated %}
-                        <a href="{% url 'user_profile' %}">{{ user.username }}</a>
                         <a href="{% url 'user_logout' %}">退出</a>
                     {% else %}
                         <a href="{% url 'user_login' %}">登录</a>
                         <a href="{% url 'user_register' %}">注册</a>
                     {% endif %}
+                </div>
+            </div>
+            
+            <a href="{% url 'user_profile' %}" class="hero-avatar">
+                {% if user.is_authenticated and user.profile.avatar %}
+                    <img src="{{ user.profile.avatar.url }}" alt="头像">
+                {% elif user.is_authenticated %}
+                    {{ user.username|first }}
+                {% else %}
+                    ?
+                {% endif %}
+            </a>
+
+            <div class="container">
+                <div class="hero">
+                    <div class="hero-info">
+                        {% if user.is_authenticated %}
+                            <p class="hero-id">#{{ user.id|stringformat:"05d" }}</p>
+                            <p class="hero-welcome">{{ user.username }}, 欢迎回来!</p>
+                            <p class="hero-sub">已加入 {{ user.date_joined|timesince }}</p>
+                        {% else %}
+                            <p class="hero-id">未登录</p>
+                            <p class="hero-welcome">你好，陌生人</p>
+                            <p class="hero-sub">登录后可以看到自己的评分</p>
+                        {% endif %}
+                        <p class="hero-quote">『深海里的光，是有人往海面丢下来的』</p>
+                    </div>
                 </div>
             </div>
         </nav>
@@ -32,6 +58,43 @@
             {% block content %}{% endblock %}
         </main>
     </div>
+    <script>
+        // 滚动到一定程度 -> 收起英雄区 (带死区，防止微动时反复抽筋)
+        let collapsed = document.body.classList.contains('scrolled');
+        function setCollapsed(v) {
+            if (v === collapsed) {
+                return;
+            }
+            collapsed = v;
+            document.body.classList.toggle('scrolled', collapsed);
+            if (!collapsed) {
+                window.scrollTo(0, 0);
+            }
+        }
+
+        // 1. 滚动: 即使页面滚不动 (内容比屏幕短、已在顶端) 也会触发
+        window.addEventListener('scroll', function () {
+            if (e.deltaY < 0 && window.scrollY < 60) {
+                setCollapsed(false);
+            } else if (e.deltaY > 0 && window.scrollY > 160) {
+                setCollapsed(true);
+            }
+        }, { passive: true });
+
+        // 2. 拖动滚动条 / 键盘 / 触屏: 用 scroll 兜底 (拖滚动条不会触发 wheel)
+        let lastY = window.scrollY;
+        window.addEventListener('scroll', function () {
+            requestAnimationFrame(function () {
+                const y = window.scrollY;
+                if (y > 160) {
+                    setCollapsed(true);
+                } else if (y < lastY && y < 60) {
+                    setCollapsed(false);
+                }
+                lastY = y;
+            });
+        });
+    </script>
 
 </body>
 </html>

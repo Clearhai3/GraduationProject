@@ -2,6 +2,35 @@
 
 {% block title %}动漫列表{% endblock %}
 
+{% block hero %}
+    <a href="{% url 'user_profile' %}" class="hero-avatar">
+        {% if user.is_authenticated and user.profile.avatar %}
+            <img src="{{ user.profile.avatar.url }}" alt="头像">
+        {% elif user.is_authenticated %}
+            {{ user.username|first }}
+        {% else %}
+            ?
+        {% endif %}
+    </a>
+
+    <div class="container">
+        <div class="hero">    
+            <div class="hero-info">
+                {% if user.is_authenticated %}
+                    <p class="hero-id">#{{ user.id|stringformat:"05d" }}</p>
+                    <p class="hero-welcome">{{ user.username }}，欢迎回来！</p>
+                    <p class="hero-sub">已加入 {{ user.data_joined|timesince }}</p>
+                {% else %}
+                    <p class="hero-id">未登录</p>
+                    <p class="hero-welcome">你好，陌生人</p>
+                    <p class="hero-sub">登录后可以看到自己的评分</p>
+                {% endif %}
+                <p class="hero-quote">『深海里的光，是有人往海面丢下来的』</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
 {% block content %}
     <h1>动漫列表 (共 {{ total_count }} 部) </h1>
     
