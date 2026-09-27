@@ -25,7 +25,7 @@
     // 立即执行: 此刻 <head> 刚解析，body 一个字都没渲染 —— 页面第一帧就是缩好的
     const saved = parseFloat(sessionStorage.getItem(KEY));
     if (saved && Math.abs(saved - 1) > 1e-6) {
-        k = Math.max(LEVELS[0], Math.max(LEVELS[LEVELS.length - 1], saved));
+        k = Math.min(LEVELS[LEVELS.length - 1], Math.max(LEVELS[0], saved));
     }
     applyVars();
 

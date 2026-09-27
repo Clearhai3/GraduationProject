@@ -65,7 +65,7 @@
         // labels + values 打成 [名, 值] 对，四种图都用得上
         const pairs = raw.labels.map((name, i) => [name, raw.values[i]]);
 
-        const detail = echarts.init(document.getElementById('detailChart'));
+        const detail = initChart(document.getElementById('detailChart'));
         let option;
 
         if (KIND == 'bar') {

@@ -67,7 +67,7 @@
         // 从视图递过来的 JSON 字符串，这里已经是合法的 JS 对象了
         const scoreData = JSON.parse('{{ score_data|escapejs }}');
 
-        const chart = echarts.init(document.getElementById('scoreChart'));
+        const chart = initChart(document.getElementById('scoreChart'));
         chart.setOption({
             ...BASE,
             grid: { 
@@ -100,7 +100,7 @@
             value: activityData.values[i]
         }));
 
-        const chart2 = echarts.init(document.getElementById('activityChart'));
+        const chart2 = initChart(document.getElementById('activityChart'));
         chart2.setOption({
             ...BASE,
             legend: {
@@ -139,7 +139,7 @@
             .map((name, i) => [name, typeData.values[i]])
             .filter(p => p[1] >= 5);
 
-        const chart3 = echarts.init(document.getElementById('typeChart'));
+        const chart3 = initChart(document.getElementById('typeChart'));
         chart3.setOption({
             ...BASE,
             grid: { 
@@ -164,7 +164,7 @@
         // 图4 评分Top10(横向条形图 + 数值标签)
         const topData = JSON.parse('{{ top_data|escapejs }}');
 
-        const chart4 = echarts.init(document.getElementById('topChart'));
+        const chart4 = initChart(document.getElementById('topChart'));
         chart4.setOption({
             ...BASE,
             grid: { 
@@ -205,7 +205,7 @@
             .map((name, i) => [name, hotData.values[i]])
             .slice(0, 10);
 
-        const chart5 = echarts.init(document.getElementById('hotChart'));
+        const chart5 = initChart(document.getElementById('hotChart'));
         chart5.setOption({
             ...BASE,
             grid: {
@@ -242,7 +242,7 @@
             .map((year, i) => [Number(year), trendData.values[i]])
             .filter(p => !isNaN(p[0]));     // 只筛选"未知", 2026 保留
 
-        const chart6 = echarts.init(document.getElementById('trendChart'));
+        const chart6 = initChart(document.getElementById('trendChart'));
         chart6.setOption({
             ...BASE,   // 悬停时按 x 轴取点
             grid: {
@@ -293,7 +293,7 @@
         // 图7 活跃用户Top10(横向条形图，同图5写法)
         const activeUserData = JSON.parse('{{ active_users_data|escapejs }}');
 
-        const chart7 = echarts.init(document.getElementById('activeUserChart'));
+        const chart7 = initChart(document.getElementById('activeUserChart'));
         chart7.setOption({
             ...BASE,
             grid: { 
@@ -323,7 +323,7 @@
         const algoData = JSON.parse('{{ algorithm_data|escapejs }}');
 
         // 8-a: ItemCF，单位 %
-        const chart8a = echarts.init(document.getElementById('itemcfChart'));
+        const chart8a = initChart(document.getElementById('itemcfChart'));
         chart8a.setOption({
             ...BASE,
             grid: {
@@ -346,7 +346,7 @@
         });
 
         // 8-b: ALS，单位 RMSE 分数(越低越好)
-        const chart8b = echarts.init(document.getElementById('alsChart'));
+        const chart8b = initChart(document.getElementById('alsChart'));
         chart8b.setOption({
             ...BASE,
             grid: { 
