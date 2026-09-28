@@ -6,6 +6,7 @@ urlpatterns = [
     path("anime/<int:anime_id>/", views.anime_detail, name="anime_detail"),
     path("rank/", views.anime_rank, name="anime_rank"),
     path("search/", views.anime_search, name="anime_search"),
+    path("search/suggest/", views.anime_suggest, name="anime_suggest"),
     path("dashboard/", views.anime_dashboard, name = "anime_dashboard"),
     path("dashboard/chart/<slug:name>/", views.anime_chart_detail, name = "anime_chart_detail"),
     path("anime/<int:anime_id>/rate/", views.anime_rate, name="anime_rate"),

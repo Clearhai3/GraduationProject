@@ -67,6 +67,7 @@ nav {
     align-items: center;
     gap: 24px;
     height: 56px;
+    position: relative;
 }
 
 .logo {
@@ -74,6 +75,7 @@ nav {
     font-weight: 600;
     color: var(--text);
     letter-spacing: 0.5px;
+    transition: margin 0.3s ease;
 }
 .logo:hover { text-decoration: none; }
 
@@ -159,8 +161,9 @@ nav {
 
 /* 4.2 收起态: 往下滚时，英雄区缩成顶栏的一小条 */
 .hero, .hero-avatar, .hero-info {
-    transition: padding 0.3s ease, width 0.3s ease, height 0.3s ease,
-                font-size 0.3s ease, opacity 0.3s ease;
+    transition: padding 0.3s ease, margin 0.3s ease, width 0.3s ease,
+                height 0.3s ease, top 0.3s ease, font-size 0.3s ease,
+                opacity 0.3s ease;
 }
 
 body.scrolled .hero { 
@@ -178,6 +181,67 @@ body.scrolled .hero-info {
 }
 body.scrolled .logo {
     margin-left: 48px;  /* 36 + 12 —— 给头像让位，Elarea 往右 */
+}
+
+/* 4.3 顶栏搜索框: 绝对定位 -> 收起/展开时位置不动 */
+.nav-search {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 360px;
+}
+
+.nav-search input {
+    width: 100%;
+    height: 34px;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: 17px;
+    background: #fff;
+    font-size: 13px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.nav-search input::placeholder {
+    color: var(--muted);
+}
+.nav-search input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.12);
+}
+
+.nav-suggest {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 360px;
+    margin-top: 6px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    z-index: 200;
+    overflow: hidden;
+}
+.nav-suggest.on {
+    display: block;
+}
+.nav-suggest a {
+    display: block;
+    padding: 8px 12px;
+    font-size: 13px;
+    color: var(--text);
+    text-decoration: none;
+}
+.nav-suggest a:hover {
+    background: var(--placeholder);
+    text-decoration: none;
+}
+.nav-suggest a.active {
+    background: var(--placeholder);
 }
 
 /* 5. 表格: 排行榜 / 搜索结果 */

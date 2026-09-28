@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate, login, logout     # 登录三件�
 from django.contrib.auth.decorators import login_required       # 登录请求，用于登录后操作
 from django.contrib.auth.forms import UserCreationForm          # 注册表单(含加密)
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, JsonResponse
 from io import BytesIO                          # 内存里的"文件"
 from PIL import Image, ImageOps                 # 图片工具
 from django.core.files.base import ContentFile  # 把内存里的字节变成 Dajngo 认的文件
@@ -192,8 +192,20 @@ def anime_rank(request):        # 排行榜
 
 def anime_search(request):      # 搜索
     keyword = request.GET.get("q", "")      # 拿用户输入，没输就空
-    results = Anime.objects.filter(name__icontains=keyword)[:20] # 名字模糊索
+    if keyword:
+        results = Anime.objects.filter(name__icontains=keyword)[:20] # 名字模糊索
+    else:
+        results = []
     return render(request, "anime/search.html", {"results": results, "keyword": keyword})
+
+def anime_suggest(request):     # 搜索建议: 只回名字，越轻越好
+    keyword = request.GET.get("q", "").strip()
+
+    if not keyword:
+        return JsonResponse({"items": []})
+
+    rows = Anime.objects.filter(name__icontains=keyword).values("subject_id", "name")[:8]
+    return JsonResponse({"items": list(rows)})
 
 def anime_dashboard(request):
     # 大屏数据: 预计算好的 JSON，脚本算一次，这里直接读
