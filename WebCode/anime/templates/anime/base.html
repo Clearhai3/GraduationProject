@@ -68,55 +68,6 @@
         let collapsed = document.body.classList.contains('scrolled');
         let lockUntil = 0;
         
-
-        function highlight(i) {
-            const links = box.querySelectorAll('a');
-            if (!links.length) {
-                active = -1;
-                return;
-            }
-            if (i < 0) {
-                i = links.length - 1;
-            }
-            if (i >= links.length) {
-                i = 0;
-            }
-            links.forEach(a => a.classList.remove('active'));
-            links[i].classList.add('active');
-            active = i;
-        }
-
-        // 键盘上下键选建议
-        input.addEventListener('keydown', function (e) {
-            if (!box.classList.contains('on')) {
-                return;
-            }
-
-            if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                highlight(active + 1);
-            } else if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                highlight(active - 1);
-            } else if (e.key === 'Enter') {
-                const links = box.querySelectorAll('a');
-                if (active >= 0 && links[active]) {
-                    e.preventDefault();
-                    location.href = links[active].href;
-                }
-                // 没选中 -> 什么都不做 -> 表单正常提交去搜索页
-            }
-        });
-
-        // 鼠标移到某一项 -> 键盘的选中态跟着走
-        box.addEventListener('mouseover', function (e) {
-            const a = e.target.closest('a');
-            if (!a) {
-                return;
-            }
-            highlight([...box.querySelectorAll('a')].indexOf(a));
-        });
-
         function setCollapsed(v) {
             if (v === collapsed) {
                 return;
@@ -205,7 +156,7 @@
             }
 
             // 键盘上下键
-            input.addEventListener('keyword', function (e) {
+            input.addEventListener('keydown', function (e) {
                 if (!box.classList.contains('on')) {
                     return;
                 }
