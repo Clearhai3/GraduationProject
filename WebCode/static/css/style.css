@@ -306,6 +306,86 @@ th {
     color: var(--muted);
 }
 
+/* 猜你喜欢: 首页那张黄卡 */
+.card-foryou {
+    display: flex; 
+    flex-direction: column;
+    padding: 10px;
+    border: 2px solid var(--accent);
+    border-radius: 10px;
+    background: #fffbeb;    /* 极淡黄底 */
+    color: var(--text);
+}
+.card-foryou:hover {
+    text-decoration: none;
+}
+.card-foryou-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #a16207;
+    margin-bottom: 6px;
+}
+
+/* 猜你喜欢页: 横向行 */
+.row-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 20px;
+}
+.row-item {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+}
+.row-item:hover {
+    text-decoration: none;
+    border-color: var(--primary);
+}
+.row-cover {
+    width: 90px;
+    aspect-ratio: 2/3;
+    object-fit: cover;
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+.row-body { 
+    min-width: 0;
+}
+.row-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+.row-meta {
+    font-size: 13px;
+    color: var(--muted);
+}
+
+/* 从首页点进来的那一部: 黄圈闪 2 下就停 */
+@keyframes markPulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(234, 179, 8, 0);
+    }
+    50%      {
+        box-shadow: 0 0 0 6px rgba(234, 179, 8, 0.45);
+    }
+}
+.is-marked {
+    border-color: var(--accent);
+    animation: markPulse 0.7s ease-in-out 2;    /* <- 2 = 闪两下，播完即停 */
+}
+@media (prefers-reduced-motion: reduce) {
+    .is-marked {
+        animation: none; 
+        border-color: var(--accent);
+    }
+}
+
 .card-score {
     color: var(--primary);      /* 蓝色: 强调数字 */
     font-weight: 600;  

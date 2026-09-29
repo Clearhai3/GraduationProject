@@ -104,10 +104,19 @@ def anime_list(request):                # 函数名必须和 urls 里一致
 
     rand = list(Anime.objects.filter(subject_id__in=rng.sample(all_ids, 8)))
 
+    # 猜你喜欢: 先挑一部 (从热门池里随机)
+    # 必须先挑 —— 后面 48 部要把它剔掉，不然同一部会出现两次
+    hot_pool_for_you = list(Anime.objects.filter(rating_count__gte=300)
+                            .values_list("subject_id", flat=True))
+
+    foryou_pick = Anime.objects.get(subject_id=rng.choice(hot_pool_for_you))
+
     # 3. 混成一锅: 先去重，再打散
     mixed, seen = [], set()
     for a in latest + hot + best + rand:
         if a.subject_id in seen:
+            continue
+        if a.subject_id == foryou_pick.subject_id:
             continue
         seen.add(a.subject_id)
         mixed.append(a)
@@ -136,8 +145,17 @@ def anime_list(request):                # 函数名必须和 urls 里一致
     # 普通访问: 渲染完整首页
     return render(request, "anime/list.html", {
         "mixed": mixed,
+        "foryou": foryou_pick,
         "seed": seed,
         "total_count": Anime.objects.count(),
+    })
+
+def anime_for_you(request):
+    mark = request.GET.get("mark", "")  # 首页点进来的那一部 (闪烁提醒它)
+    picks = list(Anime.objects.filter(rating_count__gte=300).order_by("-rating_count")[:12])
+    return render(request, "anime/for_you.html", {
+        "picks": picks,
+        "mark": mark,
     })
 
 def anime_detail(request, anime_id):

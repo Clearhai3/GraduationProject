@@ -1,0 +1,35 @@
+{% extends "anime/base.html" %}
+{% load static %}
+
+{% block title %}猜你喜欢{% endblock %}
+
+{% block content %}
+    <h2>猜你喜欢</h2>
+
+    {% if not user.is_authenticated %}
+        <p class="foryou-hint">登录后，这里会有专门给你的推荐。</p>
+    {% elif my_rating_count < 5 %}
+        <p class="foryou-hint">还不太了解你 —— 去给几部看过的番打个分，这里就活了。</p>
+    {% else %}
+        <p class="foryou-hint">基于你的 {{ my_rating_count }} 部评分。</p>
+    {% endif %}
+
+    <div class="row-list">
+        {% for a in picks %}
+        <a class="row-item {% if mark == a.subject_id|stringformat:'s' %}is-marked{% endif %}"
+           href="/anime/{{ a.subject_id }}">
+           <img class="row-cover" src="{% static a.local_cover %}" alt="{{ a.name }}" loading="lazy">
+           <div class="row-body">
+                <div class="row-title">{{ a.name }}</div>
+                <div class="row-meta">
+                    {{ a.air_date|date:"Y-m-d"|default:"—" }}
+                    · {{ a.rating }} 分
+                    · {{ a.anime_type }}
+                    {% if a.episodes %}· {{ a.episodes }} 话{% endif %}
+                </div>
+                <div class="row-meta">导演：{{ a.director|default:"—" }}</div>
+           </div>
+        </a>
+        {% endfor %}
+    </div>
+{% endblock %}
