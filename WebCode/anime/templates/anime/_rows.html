@@ -3,6 +3,7 @@
 <a class="card" href="/anime/{{ a.subject_id }}">
     <img class="card-cover" src="{% static a.local_cover %}" alt="{{ a.name }}" loading="lazy">
     <div class="card-title">{{ a.name }}</div>
+    <div class="card-date">{{ a.air_date|date:"Y-m-d"|default:"—" }}</div>
     <div class="card-meta">
         <span class="card-score">{{ a.rating }}</span>
         <span>{{ a.anime_type }}</span>

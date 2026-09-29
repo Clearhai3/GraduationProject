@@ -32,44 +32,47 @@
 {% endblock %}
 
 {% block content %}
-    <h1>动漫列表 (共 {{ total_count }} 部) </h1>
-    
+    <h2>发现</h2>
+
     <div class="anime-grid" id="anime-grid">
-        {% include "anime/_rows.html" %}
+        {% include "anime/_rows.html" with page=mixed %}
     </div>
+
     <p id="loading">加载中……</p>
-    <p id="end" style="display: none;">🎉 已经到底啦，一共 {{ total_count }} 部，你都看完啦！</p>
+    <p id="end" style="display: none;">已经到底啦，一共 {{ total_count }}部，你都看完啦！</p>
 
     <script>
-        // 无限滚动
+        const SEED = "{{ seed }}";  // 服务器给的钥匙: 第二页要还回去
         let currentPage = 1;        // 当前在第几页
         let loading = false;        // 防重复请求的保险丝
 
         window.addEventListener("scroll", function () {
-            // 滚动条离页面底部不足 200px 时，触发加载下一页 (预加载)
+            //滚动条离页面底部不足 200px 时，触发加载下一页 (预加载)
             if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
                 loadNextPage();
             }
         });
 
         function loadNextPage() {
-            if (loading) return;    // 上一次还没回来，别重复发请求
+            if (loading) {
+                return;     // 上一次还没回来，别重复发请求
+            }
             loading = true;
-            currentPage += 1;       // 要下一页
+            currentPage += 1;   // 要下一页
 
-            fetch("/?page=" + currentPage, {
+            fetch("/?page=" + currentPage + "&seed=" + encodeURIComponent(SEED), {
                 headers: {"X-Requested-With": "XMLHttpRequest"}     // 接头暗号
             })
             .then(res => res.text())    // 拿到的是纯 HTML 行
             .then(html => {
-                if (html.trim() == "") { // 空 = 服务器说没或了
+                if (html.trim() == "") {
                     document.getElementById("loading").style.display = "none";
                     document.getElementById("end").style.display = "block";
                     return;
                 }
-                // 把新行追加到表格尾部 (不刷新页面！)
+                // 把新行追加到网格尾部 (不刷新页面! )
                 document.getElementById("anime-grid").insertAdjacentHTML("beforeend", html);
-                loading = false;        // 放行，允许下一次加载
+                loading = false;    // 放行，允许下一次加载
             });
         }
     </script>

@@ -267,7 +267,7 @@ th {
     margin: 24px 0 48px;
 }
 
-.card { display: block; color: var(--text); }
+.card { display: flex; flex-direction: column; color: var(--text); }
 .card:hover { text-decoration: none; }
 
 .card-cover {
@@ -293,8 +293,15 @@ th {
     overflow: hidden;
 }
 
+.card-date {
+    margin-top: 2px;
+    font-size: 12px;
+    color: var(--muted);
+}
+
 .card-meta {
-    margin-top: 4px;
+    margin-top: auto;
+    padding-top: 6px;
     font-size: 13px;
     color: var(--muted);
 }

@@ -11,6 +11,8 @@ from django.core.files.base import ContentFile  # 把内存里的字节变成 Da
 from uuid import uuid4
 import os   # 借 os 工具 (操作系统接口)
 import json
+import random
+
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 AVATAR_SIZE = 400                       # 头像输出边长(px)
@@ -75,21 +77,68 @@ CHART_PAGES = {
 }
 
 def anime_list(request):                # 函数名必须和 urls 里一致
-    page_num = request.GET.get("page", 1)   # 前段要第几页，默认第 1 页
-    paginator = Paginator(Anime.objects.all(), 20)  # 5009 部 ÷ 20 = 251 页
-    try:
-        page = paginator.page(page_num)     # 要第 N 页 (页码非法会报错)
-    except (PageNotAnInteger, EmptyPage):
-        page = None                         # 页码是乱写的 / 超出范围 = 没货
+    # 1. 定种子: 同一颗种子 -> 同一批 48 部
+    seed = request.GET.get("seed") or str(random.random())  # 未登录: 每次刷新随机
     
-    # 带暗号 X-Requested-With 的请求 = AJAX 滚动加载，只回数据行
+    rng = random.Random(seed)
+
+    # 2. 抽四批 (每批守自己的规矩)
+    # 最新: 从"最近 100 部"里随机抽 20 部 (不是取前 20 —— 那样永远一样)
+    latest_pool = list(Anime.objects.exclude(air_date=None).order_by("-air_date")[:100]
+                       .values_list("subject_id", flat=True))
+    
+    latest = list(Anime.objects.filter(subject_id__in=rng.sample(latest_pool, 20)))
+
+    hot_pool = list(Anime.objects.filter(rating_count__gte=300)
+                    .values_list("subject_id", flat = True))
+
+    hot = list(Anime.objects.filter(subject_id__in=rng.sample(hot_pool, 12)))
+
+    # 高分: 同样从"评分前 100"里随机抽 8 部
+    best_pool = list(Anime.objects.exclude(rating=None).filter(rating_count__gte=500)
+                     .order_by("-rating")[:100].values_list("subject_id", flat=True))
+
+    best = list(Anime.objects.filter(subject_id__in=rng.sample(best_pool, 8)))
+
+    all_ids = list(Anime.objects.values_list("subject_id", flat=True))
+
+    rand = list(Anime.objects.filter(subject_id__in=rng.sample(all_ids, 8)))
+
+    # 3. 混成一锅: 先去重，再打散
+    mixed, seen = [], set()
+    for a in latest + hot + best + rand:
+        if a.subject_id in seen:
+            continue
+        seen.add(a.subject_id)
+        mixed.append(a)
+    rng.shuffle(mixed)    
+
+    # 3.5 去重可能剔掉几张(热门和高分会撞车)，从全站补回来，凑够 48
+    if len(mixed) < 48:
+        spare_pool = [i for i in all_ids if i not in seen]
+        for sid in rng.sample(spare_pool, 48 - len(mixed)):
+            seen.add(sid)
+            mixed.append(Anime.objects.get(subject_id=sid))  
+
+    # 4. 剩下的接无限滚动 (排掉第一屏已出现的)
+    rest = Anime.objects.exclude(subject_id__in=seen).order_by("subject_id")
+    paginator = Paginator(rest, 20)
+
+    # 带暗号 X-Requested-With = AJAX 滚动加载，只回数据行
     if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-        if page is None:
-            return HttpResponse("")         # 空响应 = 告诉前端"到底了"
-        return render(request, "anime/_rows.html", {"page": page, "total_count": paginator.count})
+        try:
+            # 前端第 2 页 = rest 的第 1 页 (第 1 屏被混合流占掉了)
+            rest_page = paginator.page(int(request.GET.get("page", 2)) - 1)
+        except (ValueError, PageNotAnInteger, EmptyPage):
+            return HttpResponse("")     # 空响应 = 告诉前端"到底了"
+        return render(request, "anime/_rows.html", {"page": rest_page})
 
     # 普通访问: 渲染完整首页
-    return render(request, "anime/list.html", {"page": page, "total_count": paginator.count})
+    return render(request, "anime/list.html", {
+        "mixed": mixed,
+        "seed": seed,
+        "total_count": Anime.objects.count(),
+    })
 
 def anime_detail(request, anime_id):
     anime = get_object_or_404(Anime, pk=anime_id)   # 原样保留: 查当前动漫
