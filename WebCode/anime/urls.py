@@ -11,6 +11,7 @@ urlpatterns = [
     path("dashboard/", views.anime_dashboard, name = "anime_dashboard"),
     path("dashboard/chart/<slug:name>/", views.anime_chart_detail, name = "anime_chart_detail"),
     path("anime/<int:anime_id>/rate/", views.anime_rate, name="anime_rate"),
+    path("reshuffle/", views.anime_reshuffle, name="anime_reshuffle"),
 
     # 登录系统
     path("register/", views.user_register, name = "user_register"),

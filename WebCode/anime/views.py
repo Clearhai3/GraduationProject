@@ -77,8 +77,14 @@ CHART_PAGES = {
 }
 
 def anime_list(request):                # 函数名必须和 urls 里一致
-    # 1. 定种子: 同一颗种子 -> 同一批 48 部
-    seed = request.GET.get("seed") or str(random.random())  # 未登录: 每次刷新随机
+    # 种子三级兜底: URL > session > 现生一颗
+    # URL 优先是为了无限滚动分页能带回来 (那段逻辑不变)
+    seed = request.GET.get("seed")
+    if not seed:
+        seed = request.session.get("home_seed")     # 老访客: 拿到上次那颗 -> 同一批 48 部
+        if not seed:
+            seed = str(random.random())
+            request.session["home_seed"] = seed
     
     rng = random.Random(seed)
 
@@ -149,6 +155,11 @@ def anime_list(request):                # 函数名必须和 urls 里一致
         "seed": seed,
         "total_count": Anime.objects.count(),
     })
+
+def anime_reshuffle(request):
+    """换一批: 丢掉首页那颗种子，再回首页 (回去时会生新的) """
+    request.session.pop("home_seed", None)
+    return redirect("anime_list")
 
 def anime_for_you(request):
     mark = request.GET.get("mark", "")  # 首页点进来的那一部 (闪烁提醒它)

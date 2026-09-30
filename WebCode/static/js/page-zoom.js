@@ -10,7 +10,6 @@
 
     let k = 1;          // 当前倍数, 1 = 原始
     let lastWheel = 0;  // 触控板捏合会瞬间连发十几个 wheel
-    let btn = null;     // 还原按钮 (DOM 齐了才有)
 
     // 把倍数写进 CSS 变量。样式表负责应用:
     //  #page-zoom          -> zoom
@@ -71,7 +70,6 @@
             window.scrollTo(0, Math.round((S1 / oldMax) * newMax));
         }
 
-        if (btn) btn.classList.toggle('on', k !==1);
         sessionStorage.setItem(KEY, String(k));
         window.dispatchEvent(new Event('resize'));
         window.dispatchEvent(new Event('pagezoom'));
@@ -99,15 +97,5 @@
         const up = e.deltaY < 0;    // 上滚 = 放大
         setZoom(step(up ? 1 : -1), up ? { x: e.clientX, y: e.clientY} : null);
     }, { passive: false });
-
-    // 事件挂在 DOM 齐了之后 —— 此时才找得到按钮
-    document.addEventListener('DOMContentLoaded', function () {
-        btn = document.getElementById('page-zoom-reset');
-        if (!btn) return;
-        if (k !== 1) btn.classList.add('on');
-        btn.addEventListener('click', function () {
-            setZoom(1, null);
-        });
-    });
 
 })();
