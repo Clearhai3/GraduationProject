@@ -370,13 +370,14 @@ th {
 @keyframes markPulse {
     0%, 100% {
         box-shadow: 0 0 0 0 rgba(234, 179, 8, 0);
+        border-color: var(--border);
     }
     50%      {
         box-shadow: 0 0 0 6px rgba(234, 179, 8, 0.45);
+        border-color: var(--accent);
     }
 }
 .is-marked {
-    border-color: var(--accent);
     animation: markPulse 0.7s ease-in-out 2;    /* <- 2 = 闪两下，播完即停 */
 }
 @media (prefers-reduced-motion: reduce) {

@@ -7,6 +7,10 @@
     <div class="card-meta">
         <span class="card-score">{{ a.rating }}</span>
         <span>{{ a.anime_type }}</span>
+        {% if a.subject_id in foryou_ids %}
+            <span class="card-foryou-label"
+                  data-foryou="{% url 'anime_for_you' %}?mark={{ a.subject_id }}">猜你喜欢</span>
+        {% endif %}
     </div>
 </a>
 {% endfor %}

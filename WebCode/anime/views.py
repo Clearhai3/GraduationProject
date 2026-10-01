@@ -76,6 +76,24 @@ CHART_PAGES = {
     },
 }
 
+def _foryou_pool(seed, user):
+    """『猜你喜欢』池子: 20 部。
+    独立派生一颗种子，保证首页和 /foryou/ 抽出来一模一样。"""
+    rng = random.Random(seed + "-foryou")
+
+    pool = list(Anime.objects.filter(rating_count__gte=300)
+                .values_list("subject_id", flat=True))
+
+    if user.is_authenticated:
+        rated = set(UserRating.objects.filter(user=user)
+                    .values_list("anime_id", flat=True))
+        pool = [i for i in pool if i not in rated]
+        if len(pool) < 20:
+            pool = list(Anime.objects.filter(rating_count__gte=300)
+                        .values_list("subject_id", flat=True))
+
+    return rng.sample(pool, min(20, len(pool)))
+
 def anime_list(request):                # 函数名必须和 urls 里一致
     # 种子三级兜底: URL > session > 现生一颗
     # URL 优先是为了无限滚动分页能带回来 (那段逻辑不变)
@@ -110,19 +128,19 @@ def anime_list(request):                # 函数名必须和 urls 里一致
 
     rand = list(Anime.objects.filter(subject_id__in=rng.sample(all_ids, 8)))
 
-    # 猜你喜欢: 先挑一部 (从热门池里随机)
-    # 必须先挑 —— 后面 48 部要把它剔掉，不然同一部会出现两次
-    hot_pool_for_you = list(Anime.objects.filter(rating_count__gte=300)
-                            .values_list("subject_id", flat=True))
+    # 猜你喜欢: 从池子里露 2 部 (甲方案: 刷新不变)
+    pool_ids = _foryou_pool(seed, request.user)
+    foryou_head = pool_ids[:2]
+    foryou_tail = pool_ids[2:]
+    pool_set = set(pool_ids)
 
-    foryou_pick = Anime.objects.get(subject_id=rng.choice(hot_pool_for_you))
+    foryou_picks = [Anime.objects.get(subject_id=i) for i in foryou_head]
+    
 
     # 3. 混成一锅: 先去重，再打散
     mixed, seen = [], set()
     for a in latest + hot + best + rand:
-        if a.subject_id in seen:
-            continue
-        if a.subject_id == foryou_pick.subject_id:
+        if a.subject_id in seen or a.subject_id in pool_set:
             continue
         seen.add(a.subject_id)
         mixed.append(a)
@@ -130,14 +148,43 @@ def anime_list(request):                # 函数名必须和 urls 里一致
 
     # 3.5 去重可能剔掉几张(热门和高分会撞车)，从全站补回来，凑够 48
     if len(mixed) < 48:
-        spare_pool = [i for i in all_ids if i not in seen]
+        spare_pool = [i for i in all_ids if i not in seen and i not in pool_set]
         for sid in rng.sample(spare_pool, 48 - len(mixed)):
             seen.add(sid)
-            mixed.append(Anime.objects.get(subject_id=sid))  
+            mixed.append(Anime.objects.get(subject_id=sid))
+    
+    # 2 部推荐混进 48 部，随机位置 (像普通卡片一样出现)
+    for a in foryou_picks:
+        seen.add(a.subject_id)
+        mixed.insert(rng.randint(0, len(mixed)), a)
 
-    # 4. 剩下的接无限滚动 (排掉第一屏已出现的)
-    rest = Anime.objects.exclude(subject_id__in=seen).order_by("subject_id")
-    paginator = Paginator(rest, 20)
+
+    # 4. 滚动流
+    PER_SCREEN = 2
+    PER_PAGE = 20
+
+    normal_ids = list(
+        Anime.objects.exclude(subject_id__in=seen)
+        .order_by("subject_id")
+        .values_list("subject_id", flat=True)
+    )
+
+    rest_ids = []
+    cursor = 0
+    pending = list(foryou_tail)
+
+    while pending:
+        chunk = normal_ids[cursor:cursor + PER_PAGE]
+        cursor += PER_PAGE
+        for sid in pending[:PER_SCREEN]:
+            chunk.insert(rng.randint(0, len(chunk)), sid)
+        pending = pending[PER_SCREEN:]
+        rest_ids.extend(chunk)
+
+    rest_ids.extend(normal_ids[cursor:])
+
+    # 分页分的是"id 列表"(便宜)，每次只按当页 id 取回对象
+    paginator = Paginator(rest_ids, 20)
 
     # 带暗号 X-Requested-With = AJAX 滚动加载，只回数据行
     if request.headers.get("X-Requested-With") == "XMLHttpRequest":
@@ -145,13 +192,22 @@ def anime_list(request):                # 函数名必须和 urls 里一致
             # 前端第 2 页 = rest 的第 1 页 (第 1 屏被混合流占掉了)
             rest_page = paginator.page(int(request.GET.get("page", 2)) - 1)
         except (ValueError, PageNotAnInteger, EmptyPage):
-            return HttpResponse("")     # 空响应 = 告诉前端"到底了"
-        return render(request, "anime/_rows.html", {"page": rest_page})
+            return HttpResponse("") # 空响应 = 告诉前端"到底了"
+
+        # filter() 出来是 id 升序，得按 id 列表的顺序摆回去
+        order = {}
+        for i, sid in enumerate(rest_page.object_list):
+            order[sid] = i
+            
+        rows = sorted(Anime.objects.filter(subject_id__in=rest_page.object_list),
+                      key=lambda a: order[a.subject_id])
+        return render(request, "anime/_rows.html",
+                      {"page": rows, "foryou_ids": pool_ids})
 
     # 普通访问: 渲染完整首页
     return render(request, "anime/list.html", {
         "mixed": mixed,
-        "foryou": foryou_pick,
+        "foryou_ids": pool_ids,
         "seed": seed,
         "total_count": Anime.objects.count(),
     })
@@ -163,10 +219,31 @@ def anime_reshuffle(request):
 
 def anime_for_you(request):
     mark = request.GET.get("mark", "")  # 首页点进来的那一部 (闪烁提醒它)
-    picks = list(Anime.objects.filter(rating_count__gte=300).order_by("-rating_count")[:12])
+
+    seed = request.session.get("home_seed")     # 读首页那颗种子
+    if not seed:                                # 直接输网址进来的，现生一颗
+        seed = str(random.random())
+        request.session["home_seed"] = seed
+
+    pool_ids = _foryou_pool(seed, request.user)
+
+    # 按池子自己的顺序取回来 
+    order = {sid: i for i, sid in enumerate(pool_ids)}
+    picks = sorted(Anime.objects.filter(subject_id__in=pool_ids),
+                   key=lambda a: order[a.subject_id])
+
+    # 点到的动漫放到最前面
+    if mark.isdigit():
+        picks.sort(key=lambda a: a.subject_id != int(mark))
+
+    my_rating_count = 0
+    if request.user.is_authenticated:
+        my_rating_count = UserRating.objects.filter(user=request.user).count()
+
     return render(request, "anime/for_you.html", {
         "picks": picks,
         "mark": mark,
+        "my_rating_count": my_rating_count,
     })
 
 def anime_detail(request, anime_id):

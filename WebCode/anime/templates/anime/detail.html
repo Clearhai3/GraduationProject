@@ -4,6 +4,25 @@
 {% block title %}{{ anime.name }}{% endblock %}
 
 {% block content %}
+    <p><a href="/" id="btn-back">← 返回</a></p>
+
+    <script>
+        // 站内来的 -> 原路退回；站外来的 -> 老实去首页
+        (function () {
+            const btn = document.getElementById('btn-back');
+
+            // referrer 空 = 直接输网址/新标签进来 -> 不拦它
+            if (!document.referrer || !document.referrer.startsWith(location.origin)) {
+                return;
+            }
+
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                history.back();
+            });
+        })();
+    </script>
+    
     <h1>{{ anime.name }}</h1>
         <img src="{% static anime.local_cover %}" alt="{{ anime.name }}" style="max-height: 300px;">
     <p><strong>类型：</strong>{{ anime.anime_type }}</p>
@@ -41,5 +60,4 @@
         <p>暂无相关推荐</p>
     {% endif %}
 
-    <p><a href="/">← 返回列表</a></p>
 {% endblock %}

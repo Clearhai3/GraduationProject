@@ -36,12 +36,7 @@
     <h2>发现</h2>
 
     <div class="anime-grid" id="anime-grid">
-        <a class="card-foryou" href="{% url 'anime_for_you' %}?mark={{ foryou.subject_id }}">
-            <div class="card-foryou-label">猜你喜欢</div>
-            <img class="card-cover" src="{% static foryou.local_cover %}" alt="{{ foryou.name }}" loading="lazy">
-            <div class="card-title">{{ foryou.name }}</div>
-        </a>
-        {% include "anime/_rows.html" with page=mixed %}
+        {% include "anime/_rows.html" with page=mixed foryou_ids=foryou_ids %}
     </div>
 
     <p id="loading">加载中……</p>
