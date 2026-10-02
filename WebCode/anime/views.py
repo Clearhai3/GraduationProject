@@ -199,8 +199,11 @@ def anime_list(request):                # 函数名必须和 urls 里一致
         for i, sid in enumerate(rest_page.object_list):
             order[sid] = i
             
-        rows = sorted(Anime.objects.filter(subject_id__in=rest_page.object_list),
-                      key=lambda a: order[a.subject_id])
+        rows = sorted(Anime.objects.filter(subject_id__in=rest_page.object_list)
+                                   .prefetch_related("tag_links__tag"),
+                      key=lambda a: order[a.subject_id]
+        )
+        
         return render(request, "anime/_rows.html",
                       {"page": rows, "foryou_ids": pool_ids})
 
@@ -229,8 +232,10 @@ def anime_for_you(request):
 
     # 按池子自己的顺序取回来 
     order = {sid: i for i, sid in enumerate(pool_ids)}
-    picks = sorted(Anime.objects.filter(subject_id__in=pool_ids),
-                   key=lambda a: order[a.subject_id])
+    picks = sorted(Anime.objects.filter(subject_id__in=pool_ids)
+                                .prefetch_related("tag_links__tag"),
+                   key=lambda a: order[a.subject_id]
+    )
 
     # 点到的动漫放到最前面
     if mark.isdigit():

@@ -83,6 +83,52 @@ class UserProfile(models.Model):
     def __str__(self):
         return f"{self.user.username} 的资料"
 
+class Tag(models.Model):
+    """标签词库 —— 用户和动漫共用同一份"""
+    name = models.CharField(max_length=50, unique=True)     # 科幻 / 热血
+    slug = models.SlugField(max_length=50, unique=True)     # 给 URL 用
+    source = models.CharField(max_length=20, default="bangumi")     # manual / bangumi
+    sort_order = models.IntegerField(default=0)             # 显示顺序
+    is_active = models.BooleanField(default=True)           # 能不能被选
+
+    def __str__(self):
+        return self.name
+
+class AnimeTag(models.Model):
+    """动漫 标签 —— 这部番是什么题材"""
+    anime = models.ForeignKey(
+        Anime, on_delete=models.CASCADE,
+        related_name="tag_links", db_index=True,
+    )
+    tag = models.ForeignKey(
+        Tag, on_delete=models.CASCADE,
+        related_name="anime_links", db_index=True,
+    )
+
+    class Meta:
+        unique_together = ("anime", "tag")
+
+    def __str__(self):
+        return f"{self.anime.name} - {self.tag.name}"
+
+class UserTag(models.Model):
+    """用户 标签 —— 这个人喜欢什么"""
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE,
+        related_name="user_tags", db_index=True,
+    )
+    tag = models.ForeignKey(
+        Tag, on_delete=models.CASCADE,
+        related_name="user_links", db_index=True,
+    )
+    source = models.CharField(max_length=20, default="self")    # <- self / admin / algorithm
+
+    class Meta:
+        unique_together = ("user", "tag")
+
+    def __str__(self):
+        return f"{self.user.username} - {self.tag.name}"
+
 # Operations to perform:
 #   Apply all migrations: admin, anime, auth, contenttypes, sessions
 # Running migrations:

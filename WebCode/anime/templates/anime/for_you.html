@@ -16,7 +16,9 @@
                 <div class="row-meta">
                     {{ a.air_date|date:"Y-m-d"|default:"—" }}
                     · {{ a.rating }} 分
-                    · {{ a.anime_type }}
+                    {% if a.tag_links.all %}
+                    · {% for t in a.tag_links.all %}{{ t.tag.name }}{% if not forloop.last %} / {% endif %}{% endfor %}
+                    {% endif %}
                     {% if a.episodes %}· {{ a.episodes }} 话{% endif %}
                 </div>
                 <div class="row-meta">导演：{{ a.director|default:"—" }}</div>
