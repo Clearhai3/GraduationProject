@@ -8,6 +8,7 @@ from django.http import HttpResponse, Http404, JsonResponse
 from django.core.files.base import ContentFile  # 把内存里的字节变成 Dajngo 认的文件
 from functools import wraps
 from .permissions import can_view_dashboard
+from .recommend import recommend_for_user
 from io import BytesIO                          # 内存里的"文件"
 from PIL import Image, ImageOps                 # 图片工具
 from uuid import uuid4
@@ -82,7 +83,14 @@ CHART_PAGES = {
 
 def _foryou_pool(seed, user):
     """『猜你喜欢』池子: 20 部。
-    独立派生一颗种子，保证首页和 /foryou/ 抽出来一模一样。"""
+    · 有评分 -> 相似度扩散，结果由评分决定
+    · 没评分 -> 热门池随机，冷启动兜底，跟首页共用同一颗种子
+    """
+    # 甲: 有燃料 -> 真推荐
+    recs = recommend_for_user(user, 20)
+    if recs:
+        return [aid for aid, _ in recs]
+
     rng = random.Random(seed + "-foryou")
 
     pool = list(Anime.objects.filter(rating_count__gte=300)
