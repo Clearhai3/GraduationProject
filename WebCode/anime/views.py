@@ -8,7 +8,7 @@ from django.http import HttpResponse, Http404, JsonResponse
 from django.core.files.base import ContentFile  # 把内存里的字节变成 Dajngo 认的文件
 from functools import wraps
 from .permissions import can_view_dashboard
-from .recommend import recommend_for_user
+from .recommend import recommend_for_user, get_sim
 from io import BytesIO                          # 内存里的"文件"
 from PIL import Image, ImageOps                 # 图片工具
 from uuid import uuid4
@@ -267,16 +267,15 @@ def anime_detail(request, anime_id):
     anime = get_object_or_404(Anime, pk=anime_id)   # 原样保留: 查当前动漫
 
     # 新增: 相关推荐
-    similar_animes = []
-    sim_file = os.path.join(BASE_DIR, "../../Spider/algorithms/itemcf/data/itemcf_sim_train.txt")
-    with open(sim_file, encoding = "utf-8") as f:   
-        for line in f:
-            if line.startswith(f"相似Top:{anime_id}\t"):    # 找到本动漫那行
-                # 解析: Tab切开 -> 取第2段 -> 按|切开 -> 每项按: 切开拿id
-                parts = line.split("\t")[1].split("|")
-                similar_ids = [int(p.split(":")[0]) for p in parts[:6]] # 只要前 6 个邻居
-                similar_animes = list(Anime.objects.filter(subject_id__in=similar_ids))
-                break       # 找到就停
+    neighbors = get_sim().get(anime_id, {})
+    similar_ids = [aid for aid, _ in sorted(neighbors.items(), key=lambda kv: (-kv[1], kv[0]))[:6]]
+
+    # filter(_in=) 不保存(实测 99% 的番顺序错, MySQL 按主键升序返回) -> 自己拼回去
+    order = {sid: i for i, sid in enumerate(similar_ids)}
+    similar_animes = sorted(
+        Anime.objects.filter(subject_id__in=similar_ids),
+        key=lambda a: order[a.subject_id]
+    )
     # 新增结束
 
     # 我在这页打的分: 没登录 / 没打过 -> 都是 None
