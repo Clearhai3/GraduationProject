@@ -20,9 +20,11 @@
                 </form>
 
                 <div class="nav-links">
+                {% if can_view_dashboard %}
+                    <a href="{% url 'anime_dashboard' %}">数据大屏</a>
+                {% endif %}
                     <a href="{% url 'anime_for_you' %}">猜你喜欢</a>
                     <a href="{% url 'anime_rank' %}">排行榜</a>
-                    <a href="{% url 'anime_dashboard' %}">数据大屏</a>
                     {% if user.is_authenticated %}
                         <a href="{% url 'user_tags' %}">我的标签</a>
                         <a href="{% url 'user_logout' %}">退出</a>

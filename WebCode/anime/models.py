@@ -79,6 +79,7 @@ class UserProfile(models.Model):
         related_name="profile",
     )
     avatar = models.ImageField(upload_to="avatars/", null=True, blank=True)
+    can_view_dashboard = models.BooleanField(default=False)     # 谁能看数据大屏
 
     def __str__(self):
         return f"{self.user.username} 的资料"

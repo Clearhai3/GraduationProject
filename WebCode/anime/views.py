@@ -5,9 +5,11 @@ from django.contrib.auth.decorators import login_required       # 登录请求�
 from django.contrib.auth.forms import UserCreationForm          # 注册表单(含加密)
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.http import HttpResponse, Http404, JsonResponse
+from django.core.files.base import ContentFile  # 把内存里的字节变成 Dajngo 认的文件
+from functools import wraps
+from .permissions import can_view_dashboard
 from io import BytesIO                          # 内存里的"文件"
 from PIL import Image, ImageOps                 # 图片工具
-from django.core.files.base import ContentFile  # 把内存里的字节变成 Dajngo 认的文件
 from uuid import uuid4
 import os   # 借 os 工具 (操作系统接口)
 import json
@@ -75,6 +77,8 @@ CHART_PAGES = {
         "sub": "RMSE 越低越好 · 基准 1.3456"
     },
 }
+
+
 
 def _foryou_pool(seed, user):
     """『猜你喜欢』池子: 20 部。
@@ -401,6 +405,16 @@ def anime_suggest(request):     # 搜索建议: 只回名字，越轻越好
     rows = Anime.objects.filter(name__icontains=keyword).values("subject_id", "name")[:8]
     return JsonResponse({"items": list(rows)})
 
+def dashboard_only(view):
+    """不是自己人 -> 当这页不存在"""
+    @wraps(view)
+    def wrapper(request, *args, **kwargs):
+        if not can_view_dashboard(request.user):
+            raise Http404
+        return view(request, *args, **kwargs)
+    return wrapper
+
+@dashboard_only
 def anime_dashboard(request):
     # 大屏数据: 预计算好的 JSON，脚本算一次，这里直接读
     data_dir = os.path.join(BASE_DIR, "../../Spider/webdata")
@@ -457,6 +471,7 @@ def anime_dashboard(request):
         "algorithm_data": algorithm_json,
     })
 
+@dashboard_only
 def anime_chart_detail(request, name):
     # 单图页: 九张图共用着一个视图，差异全部查登记表
     cfg = CHART_PAGES.get(name)
