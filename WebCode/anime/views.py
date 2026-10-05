@@ -1,4 +1,4 @@
-from .models import Anime, UserRating, UserProfile               # 导入你建的 Anime 模型
+from .models import Anime, UserRating, UserProfile, Tag, UserTag  # 导入你建的 Anime 模型
 from django.shortcuts import render, redirect, get_object_or_404  # 自动回复 404 未找到
 from django.contrib.auth import authenticate, login, logout     # 登录三件套
 from django.contrib.auth.decorators import login_required       # 登录请求，用于登录后操作
@@ -330,6 +330,40 @@ def user_profile(request):
     ratings = UserRating.objects.filter(user=request.user).select_related("anime")
 
     return render(request, "anime/profile.html", {"ratings": ratings})
+
+@login_required
+def user_tags(request):
+    """选标签 —— GET 看 / POST 存 (同一个地址)"""
+    if request.method == "POST":
+        # 1. 收: 表单里所有被勾上的标签 id
+        #    注意不是 .get() —— 勾了三个就是三条，.get 只会拿到最后一个
+        picked = request.POST.getlist("tags")
+
+        # 2. 删: 只删"他自己选的那一档", 别碰 admin / algorithm
+        UserTag.objects.filter(user=request.user, source="self").delete()
+
+        # 4. 存
+        UserTag.objects.bulk_create([
+            UserTag(user=request.user, tag_id=tid, source="self")
+            for tid in picked
+        ])
+
+        return redirect("user_tags")
+
+    # GET: 把货摆出来
+    all_tags = Tag.objects.filter(is_active=True).order_by("sort_order", "id")
+
+    # 他已经选了哪些 (用 set，模板里做 in 判断快)
+    my_ids = set(
+        UserTag.objects.filter(
+            user=request.user, source="self"
+        ).values_list("tag_id", flat=True)
+    )
+
+    return render(request, "anime/tags.html", {
+        "all_tags": all_tags,
+        "my_ids": my_ids,
+    })
 
 @login_required
 def user_avatar_upload(request):

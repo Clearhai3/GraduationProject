@@ -496,3 +496,55 @@ th {
     border-color: var(--primary);
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
 }
+
+/* —— 选标签页 —— */
+.muted {
+    color: var(--muted);
+    font-size: 14px;
+    margin: 0 0 20px;
+}
+
+.tag-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+    margin-bottom: 24px;
+}
+
+.tag-pick {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.tag-pick:hover {
+    border-color: var(--text);
+}
+
+/* 勾上的样子 —— 靠 :has() 让"选了"这件事看得见 */
+.tag-pick:has(input:checked) {
+    border-color: var(--text);
+    background: #f3f4f6;
+    font-weight: 600;
+}
+
+.tag-save {
+    padding: 10px 28px;
+    border: 1px solid var(--text);
+    border-radius: 8px;
+    background: var(--text);
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.tag-save:hover {
+    opacity: 0.85;
+}

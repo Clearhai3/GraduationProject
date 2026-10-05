@@ -1,0 +1,24 @@
+{% extends "anime/base.html" %}
+
+{% block title %}我的标签{% endblock %}
+
+{% block content %}
+    <h1>我喜欢什么</h1>
+    <p class="muted">选几个你喜欢的题材，我们会按这些给你推荐。可以随时改。</p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="tag-grid">
+            {% for t in all_tags %}
+                <label class="tag-pick">
+                    <input type="checkbox" name="tags" value="{{ t.id }}"
+                           {% if t.id in my_ids %}checked{% endif %}>
+                    {{ t.name }}
+                </label>
+            {% endfor %}
+        </div>
+
+        <button type="submit" class="tag-save">保存</button>
+    </form>
+{% endblock %}

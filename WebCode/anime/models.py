@@ -124,7 +124,7 @@ class UserTag(models.Model):
     source = models.CharField(max_length=20, default="self")    # <- self / admin / algorithm
 
     class Meta:
-        unique_together = ("user", "tag")
+        unique_together = ("user", "tag", "source")
 
     def __str__(self):
         return f"{self.user.username} - {self.tag.name}"
