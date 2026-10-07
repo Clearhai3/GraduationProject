@@ -24,6 +24,12 @@ class Anime(models.Model):
     cover_url = models.CharField(max_length=500, null=True, blank=True)
     detail_url = models.CharField(max_length=500, null=True, blank=True)
 
+    # 归档
+    name_cn = models.CharField(max_length=200, null=True, blank=True)   # 中文名 (94.8%)
+    summary = models.TextField(null=True, blank=True)                   # 简介 (95.2%)
+    score_detail = models.JSONField(null=True, blank=True)              # 各分段人数 1~10
+    fav_detail = models.JSONField(null=True, blank=True)                # 收藏明细 wish/done/doing/on_hold/dropped
+
     @property
     def local_cover(self):
         """本地封面路径(相对 static/) —— 数据库不动，渲染时把网上地址换成自家门牌"""
