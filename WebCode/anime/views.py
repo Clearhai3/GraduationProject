@@ -8,7 +8,7 @@ from django.http import HttpResponse, Http404, JsonResponse
 from django.core.files.base import ContentFile  # 把内存里的字节变成 Dajngo 认的文件
 from functools import wraps
 from .permissions import can_view_dashboard
-from .recommend import recommend_for_user, get_sim
+from .recommend import recommend_for_user, get_sim, pick_by_tags
 from io import BytesIO                          # 内存里的"文件"
 from PIL import Image, ImageOps                 # 图片工具
 from uuid import uuid4
@@ -118,40 +118,46 @@ def anime_list(request):                # 函数名必须和 urls 里一致
     
     rng = random.Random(seed)
 
-    # 2. 抽四批 (每批守自己的规矩)
-    # 最新: 从"最近 100 部"里随机抽 20 部 (不是取前 20 —— 那样永远一样)
-    latest_pool = list(Anime.objects.exclude(air_date=None).order_by("-air_date")[:100]
-                       .values_list("subject_id", flat=True))
-    
-    latest = list(Anime.objects.filter(subject_id__in=rng.sample(latest_pool, 20)))
-
-    hot_pool = list(Anime.objects.filter(rating_count__gte=300)
-                    .values_list("subject_id", flat = True))
-
-    hot = list(Anime.objects.filter(subject_id__in=rng.sample(hot_pool, 12)))
-
-    # 高分: 同样从"评分前 100"里随机抽 8 部
-    best_pool = list(Anime.objects.exclude(rating=None).filter(rating_count__gte=500)
-                     .order_by("-rating")[:100].values_list("subject_id", flat=True))
-
-    best = list(Anime.objects.filter(subject_id__in=rng.sample(best_pool, 8)))
-
-    all_ids = list(Anime.objects.values_list("subject_id", flat=True))
-
-    rand = list(Anime.objects.filter(subject_id__in=rng.sample(all_ids, 8)))
-
-    # 猜你喜欢: 从池子里露 2 部 (甲方案: 刷新不变)
+    # 0. 『猜你喜欢』池子 (先算 —— 下面五个来源都得让开它)
     pool_ids = _foryou_pool(seed, request.user)
-    foryou_head = pool_ids[:2]
-    foryou_tail = pool_ids[2:]
     pool_set = set(pool_ids)
 
+    # 1. 标签召回 —— 登录 + 勾了标签才有
+    #    有它 -> 最新和最高分各让 4 部出来 (热门/随机一根毛不动)
+    tag_pool = pick_by_tags(request.user, 8, exclude=pool_set)
+    if tag_pool:
+        N_LATEST, N_BEST = 16, 4
+    else:
+        N_LATEST, N_BEST = 20, 8
+    N_HOT, N_RAND = 12, 8
+
+    # 2. 抽五批 (每批守自己的规矩)
+    # 最新: 从"最近 100 部"里随机抽 (不是取前 N —— 那样永远一样)
+    latest_pool = list(Anime.objects.exclude(air_date=None).order_by("-air_date")[:100]
+                       .values_list("subject_id", flat=True))
+    latest = list(Anime.objects.filter(subject_id__in=rng.sample(latest_pool, N_LATEST)))
+
+    hot_pool = list(Anime.objects.filter(rating_count__gte=300)
+                    .values_list("subject_id", flat=True))
+    hot = list(Anime.objects.filter(subject_id__in=rng.sample(hot_pool, N_HOT)))
+
+    best_pool = list(Anime.objects.exclude(rating=None).filter(rating_count__gte=500)
+                    .order_by("-rating")[:100].values_list("subject_id", flat=True))
+    best = list(Anime.objects.filter(subject_id__in=rng.sample(best_pool, N_BEST)))
+
+    tag = list(Anime.objects.filter(subject_id__in=tag_pool))
+
+    all_ids = list(Anime.objects.values_list("subject_id", flat=True))
+    rand = list(Anime.objects.filter(subject_id__in=rng.sample(all_ids, N_RAND)))
+
+    # 猜你喜欢: 首屏 2 部 + 散点 18 部
+    foryou_head = pool_ids[:2]
+    foryou_tail = pool_ids[2:]
     foryou_picks = [Anime.objects.get(subject_id=i) for i in foryou_head]
-    
 
     # 3. 混成一锅: 先去重，再打散
     mixed, seen = [], set()
-    for a in latest + hot + best + rand:
+    for a in latest + hot + best + tag + rand:
         if a.subject_id in seen or a.subject_id in pool_set:
             continue
         seen.add(a.subject_id)
@@ -211,8 +217,7 @@ def anime_list(request):                # 函数名必须和 urls 里一致
         for i, sid in enumerate(rest_page.object_list):
             order[sid] = i
             
-        rows = sorted(Anime.objects.filter(subject_id__in=rest_page.object_list)
-                                   .prefetch_related("tag_links__tag"),
+        rows = sorted(Anime.objects.filter(subject_id__in=rest_page.object_list),
                       key=lambda a: order[a.subject_id]
         )
         

@@ -20,7 +20,7 @@
                 {% if user.is_authenticated %}
                     <p class="hero-id">#{{ user.id|stringformat:"05d" }}</p>
                     <p class="hero-welcome">{{ user.username }}，欢迎回来！</p>
-                    <p class="hero-sub">已加入 {{ user.data_joined|timesince }}</p>
+                    <p class="hero-sub">已加入 {{ user.date_joined|timesince }}</p>
                 {% else %}
                     <p class="hero-id">未登录</p>
                     <p class="hero-welcome">你好，陌生人</p>
