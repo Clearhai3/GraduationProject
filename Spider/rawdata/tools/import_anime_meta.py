@@ -47,6 +47,7 @@ def main():
         # summary 原文件带全角空格缩进，先 strip；换行留给模板处理
         Anime.objects.filter(subject_id=d["id"]).update(
             name_cn=(d.get("name_cn") or "").strip(),
+            name_orig=(d.get("name") or "").strip(),
             summary=(d.get("summary") or "").strip(),
             score_detail=d.get("score_details") or {},
             fav_detail=d.get("favorite") or {},

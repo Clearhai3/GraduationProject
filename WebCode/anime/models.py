@@ -29,6 +29,7 @@ class Anime(models.Model):
     summary = models.TextField(null=True, blank=True)                   # 简介 (95.2%)
     score_detail = models.JSONField(null=True, blank=True)              # 各分段人数 1~10
     fav_detail = models.JSONField(null=True, blank=True)                # 收藏明细 wish/done/doing/on_hold/dropped
+    name_orig = models.CharField(max_length=200, null=True, blank=True)  # 原名 (日文 / 英文)
 
     @property
     def local_cover(self):

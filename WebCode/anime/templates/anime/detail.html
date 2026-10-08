@@ -23,7 +23,8 @@
         })();
     </script>
     
-    <h1>{{ anime.name }}</h1>
+    <h1>{{ anime.name_cn|default:anime.name }}</h1>
+    {% if anime.name_orig and anime.name_orig != anime.name %}<p class="sub-name">{{ anime.name_orig }}</p>{% endif %}
         <img src="{% static anime.local_cover %}" alt="{{ anime.name }}" style="max-height: 300px;">
     <p><strong>类型：</strong>{{ anime.anime_type }}</p>
     {% if anime.tag_links.all %}<p><strong>标签：</strong>{% for t in anime.tag_links.all %}{{ t.tag.name }}{% if not forloop.last %} / {% endif %}{% endfor %}</p>{% endif %}
@@ -31,7 +32,15 @@
     <p><strong>放送日期：</strong>{{ anime.air_date}}</p>
     <p><strong>导演：</strong>{{ anime.director }}</p>
     <p><strong>评分：</strong>{{ anime.rating }} ({{ anime.rating_count}} 人评价) </p>
-    
+
+    {% if anime.fav_detail %}
+        <p><strong>收藏: </strong>看过 {{ anime.fav_detail.done|default:0 }} / 在看 {{ anime.fav_detail.doing|default:0 }} / 想看 {{ anime.fav_detail.wish|default:0 }}</p>
+    {% endif %}
+
+    {% if anime.summary %}
+        <h2>简介</h2>
+        <div class="summary">{{ anime.summary|linebreaksbr }}</div>
+    {% endif %}
     {% if user.is_authenticated %}
         {% if my_rating %}
             <p>我打的分：<strong>{{ my_rating.rate }}</strong> 分</p>
