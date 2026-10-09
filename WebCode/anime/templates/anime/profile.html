@@ -109,6 +109,46 @@
             });
         })();
     </script>
+
+    {# —— Bangumi 绑定 —— #}
+    <div style="border: 1px solid #e5e7eb; border-radius: 8px;
+                padding: 16px; margin-bottom: 24px;">
+        <h2 style="font-size: 16px; margin: 0 0 8px;">Bangumi 绑定</h2>
+
+        {% if user.profile.bangumi_username %}
+            <p style="margin: 0 0 6px;">
+                已绑定: <strong>{{ user.profile.bangumi_username }}</strong>
+            </p>
+            {% if algo_tags %}
+                <p style="color: #6b7280; font-size: 13px; margin: 0 0 12px;">
+                    算法猜出的口味（{{ algo_tags|length }} 个) : {{ algo_tags|join:" / " }}
+                </p>
+            {% else %}
+                <p style="color: #6b7280; font-size: 13px; margin: 0 0 12px;">
+                    还没算出标签 —— 再同步一次试试
+                </p>
+            {% endif %}
+        {% else %}
+            <p style="color: #6b7280; font-size: 13px; margin: 0 0 12px;">
+                填上你的 Bangumi 用户名，系统会读一遍你"看过"的番，
+                替你猜出喜欢什么题材（不用一个个手点标签）。同步大概要几秒。
+            </p>
+        {% endif %}
+
+        <form method="post" action="{% url 'user_bangumi' %}"
+              style="display: flex; gap: 8px; align-items: center;">
+            {% csrf_token %}
+            <input type="text" name="bangumi_username" placeholder="Bangumi 用户名"
+                   value="{{ user.profile.bangumi_username|default:'' }}"
+                   style="flex: 1; max-width: 260px; padding: 6px 10px;">
+            <button type="submit">
+                {% if user.profile.bangumi_username %}重新同步{% else %}绑定并同步{% endif %}
+            </button>
+        </form>
+        <p style="color: #9ca3af; font-size: 12px; margin: 8px 0 0;">
+            清空输入框再提交 = 解除绑定（连同算法标签一起清掉）
+        </p>
+    </div>
     
     <p>共打了 <strong>{{ ratings|length }}</strong> 部</p>
 

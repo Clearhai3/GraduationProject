@@ -87,6 +87,7 @@ class UserProfile(models.Model):
     )
     avatar = models.ImageField(upload_to="avatars/", null=True, blank=True)
     can_view_dashboard = models.BooleanField(default=False)     # 谁能看数据大屏
+    bangumi_username = models.CharField(max_length=100, null=True, blank=True)  # 绑定的 Bangumi 用户名
 
     def __str__(self):
         return f"{self.user.username} 的资料"

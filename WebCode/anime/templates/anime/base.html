@@ -63,6 +63,18 @@
             </div>
         </nav>
 
+        {% if messages %}
+            <div class="container" style="margin-top: 16px;">
+                {% for m in messages %}
+                    {% if m.tags == 'error' %}
+                        <div class="msg-bar msg-err">{{ m }}</div>
+                    {% else %}
+                        <div class="msg-bar msg-ok">{{ m }}</div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+
         <main class="container">
             {% block content %}{% endblock %}
         </main>

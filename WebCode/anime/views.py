@@ -9,6 +9,8 @@ from django.core.files.base import ContentFile  # 把内存里的字节变成 Da
 from functools import wraps
 from .permissions import can_view_dashboard
 from .recommend import recommend_for_user, get_sim, pick_by_tags
+from .bangumi import sync_user_tags, BangumiError
+from django.contrib import messages
 from io import BytesIO                          # 内存里的"文件"
 from PIL import Image, ImageOps                 # 图片工具
 from uuid import uuid4
@@ -78,8 +80,6 @@ CHART_PAGES = {
         "sub": "RMSE 越低越好 · 基准 1.3456"
     },
 }
-
-
 
 def _foryou_pool(seed, user):
     """『猜你喜欢』池子: 20 部。
@@ -345,7 +345,16 @@ def user_profile(request):
     # select_related = 联手把关联的动漫一起查回来 (避免 N+1 查询)
     ratings = UserRating.objects.filter(user=request.user).select_related("anime")
 
-    return render(request, "anime/profile.html", {"ratings": ratings})
+    # 算法算出来的标签 (绑了 Bangumi 之后才有)
+    algo_tags = list(
+        UserTag.objects.filter(user=request.user, source="algorithm")
+        .values_list("tag__name", flat=True)
+    )
+
+    return render(request, "anime/profile.html", {
+        "ratings": ratings,
+        "algo_tags": algo_tags,
+    })
 
 @login_required
 def user_tags(request):
@@ -380,6 +389,48 @@ def user_tags(request):
         "all_tags": all_tags,
         "my_ids": my_ids,
     })
+
+@login_required
+def user_bangumi(request):
+    """绑 Bangumi —— 拉"看过" -> 算算法标签
+    
+    一个地址管两件事:
+        用户名非空 -> 绑定并同步
+        用户名是空 -> 解绑 (算法标签一起清)
+    """
+    if request.method != "POST":
+        return redirect("user_profile")
+
+    username = request.POST.get("bangumi_username", "").strip()
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)   # 老用户可能还没资料表
+
+    # 1. 空 = 解绑
+    if not username:
+        profile.bangumi_username = None
+        profile.save()
+        UserTag.objects.filter(user=request.user, source="algorithm").delete()  
+        messages.success(request, "已解锁绑定，算法标签也一起清掉了")
+        return redirect("user_profile")
+
+    # 2. 拉 + 算 + 写 (走代理，几白部要几秒)
+    try:
+        report = sync_user_tags(request.user, username)
+    except BangumiError as e:
+        # 拉失败就什么都不改 —— 别留下一个"看绑上了、其实没数据"的假记录
+        messages.error(request, f"同步失败: {e}")
+        return redirect("user_profile")
+
+    # 3. 成功了才记帐
+    profile.bangumi_username = username
+    profile.save()
+
+    messages.success(
+        request,
+        f"同步成功: {username} 看过 {report['total']} 部，"
+        f"其中 {report['matched']} 部在我们库里，"
+        f"算出 {len(report['tags'])} 个标签"
+    )
+    return redirect("user_profile")
 
 @login_required
 def user_avatar_upload(request):

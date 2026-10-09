@@ -67,7 +67,8 @@ def _by_tags(user, limit):
     排序 = 命中数降序 -> 热度降序 -> id 升序"""
     from .models import UserTag, AnimeTag, Anime, UserRating
 
-    tag_ids = list(UserTag.objects.filter(user=user, source="self")
+    tag_ids = list(UserTag.objects.filter(user=user, source__in=["self", "algorithm"])
+                   .distinct()
                    .values_list("tag_id", flat=True))
 
     if not tag_ids:
@@ -122,8 +123,9 @@ def pick_by_tags(user, limit, exclude=()):
 
     from .models import UserTag, AnimeTag, UserRating
 
-    tag_ids = list(UserTag.objects.filter(user=user, source="self")
+    tag_ids = list(UserTag.objects.filter(user=user, source__in=["self", "algorithm"])
                    .order_by("tag_id")
+                   .distinct()
                    .values_list("tag_id", flat=True))
 
     if not tag_ids:

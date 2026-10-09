@@ -148,3 +148,9 @@ MAILERS = {
 }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Bangumi API —— 国内直连不通，必须走本机代理
+BANGUMI_PROXY = "http://127.0.0.1:7890"
+
+# UA 要规范(带联系方式)，否则可能被 Cloudflare 拦
+BANGUMI_UA = "mriya/ElareaAnimeProject (https://github.com/Clearhai3/GraduationProject)"

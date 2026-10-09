@@ -24,6 +24,9 @@ urlpatterns = [
     # 用户标签
     path("tags/", views.user_tags, name="user_tags"),
 
+    # Bangumi 绑定
+    path("profile/bangumi/", views.user_bangumi, name="user_bangumi"),
+
     # 头像
     path("avatar/upload", views.user_avatar_upload, name="user_avatar_upload"),
 ]
