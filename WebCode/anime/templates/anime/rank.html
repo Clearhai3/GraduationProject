@@ -1,20 +1,30 @@
 {% extends "anime/base.html" %}
 
-{% block title %}排行榜{% endblock %}
+{% block title %}{{ title }}{% endblock %}
 
 {% block content %}
-    <h1>🏆 评分排行榜 (Top 20)</h1>
+    <h1>🏆 {{ title }} (Top 20)</h1>
+    <p class="rank-tabs">
+        <a href="?sort=rating" class="{% if sort == 'rating' %}on{% endif %}">评分榜</a>
+        <a href="?sort=hot" class="{% if sort == 'hot' %}on{% endif %}">人气榜</a>
+        <a href="?sort=rank" class="{% if sort == 'rank' %}on{% endif %}">排名榜</a>
+    </p>
     <table>
         <tr>
             <th>排名</th>
             <th>名称</th>
-            <th>评分</th>
+            <th>{% if sort == 'hot' %}评分人数{% elif sort == 'rank' %}Bangumi 排名{% else %}评分{% endif %}</th>
         </tr>
         {% for a in animes %}
         <tr>
             <td>{{ forloop.counter }}</td>
             <td><a href="/anime/{{ a.subject_id }}">{{ a.name }}</a></td>
-            <td>{{ a.rating }}</td>
+            <td>
+                {% if sort == 'hot' %}{{ a.rating_count }}
+                {% elif sort == 'rank' %}#{{ a.rank }}
+                {% else %}{{ a.rating }}
+                {% endif %}
+            </td>
         </tr>
         {% endfor %}
     </table>

@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required       # 登录请求�
 from django.contrib.auth.forms import UserCreationForm          # 注册表单(含加密)
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.http import HttpResponse, Http404, JsonResponse
+from django.db.models import Q                  # 让筛选条件"或"起来
 from django.core.files.base import ContentFile  # 把内存里的字节变成 Dajngo 认的文件
 from functools import wraps
 from .permissions import can_view_dashboard
@@ -447,14 +448,27 @@ def user_avatar_upload(request):
 
     return redirect("user_profile")
 
+RANK_MODES = {          # 口径名 -> (主排序键，并列时的第二排序键，页面上显示的名字)
+    "rating": ("-rating", "-rating_count", "评分榜"),
+    "hot":    ("-rating_count", "-rating", "人气榜"),
+    "rank":   ("rank", "rating_count", "排名榜"),
+}
+
 def anime_rank(request):        # 排行榜
-    animes = Anime.objects.order_by("-rating")[:20]     # 评分倒叙，取前 20
-    return render(request, "anime/rank.html", {"animes": animes})
+    sort = request.GET.get("sort", "rating")
+    if sort not in RANK_MODES:
+        sort = "rating"         # 瞎传参数 -> 回默认，别让它 500
+    first, second, title = RANK_MODES[sort]
+    animes = Anime.objects.order_by(first, second)[:20]     # 评分倒叙，取前 20
+    return render(request, "anime/rank.html", 
+                  {"animes": animes, "sort": sort, "title": title})
 
 def anime_search(request):      # 搜索
     keyword = request.GET.get("q", "")      # 拿用户输入，没输就空
     if keyword:
-        results = Anime.objects.filter(name__icontains=keyword)[:20] # 名字模糊索
+        results = Anime.objects.filter(
+            Q(name__icontains=keyword) | Q(name_orig__icontain=keyword)
+        )[:20] # 名字模糊索
     else:
         results = []
     return render(request, "anime/search.html", {"results": results, "keyword": keyword})
@@ -465,7 +479,10 @@ def anime_suggest(request):     # 搜索建议: 只回名字，越轻越好
     if not keyword:
         return JsonResponse({"items": []})
 
-    rows = Anime.objects.filter(name__icontains=keyword).values("subject_id", "name")[:8]
+    rows = Anime.objects.filter(
+        Q(name__icontains=keyword) | Q(name_orig__icontains=keyword)
+    ).values("subject_id", "name")[:8]
+
     return JsonResponse({"items": list(rows)})
 
 def dashboard_only(view):
