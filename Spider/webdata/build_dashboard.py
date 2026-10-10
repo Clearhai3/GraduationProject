@@ -152,18 +152,25 @@ def build_hot_anime_top20():
     return len(labels)
 
 def build_yearly_trend():
-    """图7: 年度放送趋势 —— 数据源 MySQL anime_anime"""
+    """图7: 年度放送趋势 —— 数据源 MySQL ads_year_trend (Hive 统计 + Sqop 导出) """
     sql = """
-        SELECT YEAR(air_date) AS yr, COUNT(*) AS cnt
-        FROM anime_anime
-        GROUP BY YEAR(air_date)
-        ORDER BY yr IS NULL, yr
+        SELECT yr, cnt
+        FROM ads_year_trend
+        ORDER BY yr
     """
 
     rows = query_rows(sql)
 
-    labels = ["未知" if row["yr"] is None else str(row["yr"]) for row in rows]
+    labels = [str(row["yr"]) for row in rows]
     values = [row["cnt"] for row in rows]
+
+    # Hive 侧只统计了"能抠出年份"的番；剩下的补成一个"未知"档，
+    # 让各档之和仍然等于总数 (总数从 ads_overview 取，不写死)
+    total_rows = query_rows("SELECT value FROM ads_overview WHERE metric = '动漫总数'")
+    missing = int(total_rows[0]["value"]) - sum(values)
+    if missing > 0:
+        labels.append("未知")
+        values.append(missing)
 
     save_json("anime", "yearly_trend.json", {"labels": labels, "values": values})
     return sum(values)
