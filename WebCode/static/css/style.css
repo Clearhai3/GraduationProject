@@ -566,3 +566,221 @@ th {
     background: #fef2f2;
     color: #b91c1c;
 }
+
+/* 排行榜三口径的切换 */
+.rank-tabs {
+    display: flex;
+    gap: 20px;
+    margin: 0 0 16px;
+}
+.rank-tabs a {
+    color: var(--muted);
+}
+.rank-tabs a.on {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+/* 手机抽屉: 桌面一律隐藏 */
+.nav-burger,
+.nav-close,
+.nav-search-toggle {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--text);
+    cursor: pointer;
+}
+.nav-burger:hover,
+.nav-close:hover,
+.nav-search-toggle:hover {
+    color: var(--primary);
+}
+
+.nav-mask {
+    display: none;          /* 桌面没这个东西 */
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 250;           /* nav(100) < 遮罩(250) < 抽屉(300) */
+    transition: opacity 0.25s ease;
+}
+
+/* 窄屏: 手机 / 平板竖屏 (viewport 打开后的最小适配) */
+@media (max-width: 768px) {
+    :root {
+        --gutter: 16px;     /* 左右边距 32 -> 16，.container 自动跟着变 */
+    }
+
+    body {
+        min-width: 0;       /* 松开 1152 下界 —— 最关键的一行 */
+    }
+
+    /* 顶栏: 两行 */
+    .nav-inner {
+        height: auto;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 10px var(--gutter);
+    }
+    .logo {
+        font-size: 16px;
+        white-space: nowrap;
+    }
+    body.scrolled .logo {
+        margin-left: 44px;     /* 手机上头像不飞过来，别给它让位 */
+    }
+
+    /* 搜索: 收起来是 0 宽 (藏住), 点 🔍 才铺开 */
+    .nav-search {
+        position: absolute;   
+        top: 10px;
+        left: auto;
+        right: 58px;
+        width: 0;
+        height: 36px;
+        transform: none;
+        opacity: 0;
+        pointer-events: none;
+        transition: width 0.25s ease, opacity 0.2s ease;
+        z-index: 150;
+    }
+    body.search-open .nav-search {
+        width: calc(100% - 74px);   /* 从左 16 一路铺到 ☰ 左边 */
+        opacity: 1;
+        pointer-events: auto;
+    }
+    .nav-search input {
+        height: 36px;
+        border-radius: 8px;     /* 跟 🔍 / ☰ 一套长相 */
+        font-size: 16px;        /* ⚠️ 小于 16px，iOS 会放大整页 */
+    }
+    .nav-suggest {
+        width: 100%;
+        left: 0;
+        transform: none;
+    }
+
+    .nav-search-toggle {
+        display: flex;
+        margin-left: auto;      /* 把 🔍 和 ☰ 一起推到最右 */
+    }
+    .nav-burger {
+        display: flex;
+        margin-left: 0;         /* 推到最右 (替 .nav-links 干这活) */
+    }
+
+    /* 抽屉: 复用 .nav-links，只把它换个盒子装 */
+    .nav-links {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 240px;
+        height: 100%;
+        margin: 0;
+        padding: 56px 24px 24px;
+        flex-direction: column;     /* 现在是 row -> 5 个链接会横着挤成一行 */
+        align-items: stretch;
+        gap: 2px;                   /* 竖排用不上 12px 那么大的间距 */
+        background: var(--bg);
+        border-left: 1px solid var(--border);
+        overflow-y: auto;
+        transform: translateX(100%);    /* 默认藏在屏幕右边外面 */
+        transition: transform 0.25s ease;
+        z-index: 300;
+    }
+    .nav-links a {
+        width: 100%;
+        padding: 10px 0;
+        font-size: 15px;
+    }
+
+    body.nav-open .nav-links {
+        transform: translateX(0);
+    }
+
+    .nav-close {
+        display: flex;
+        align-self: flex-end;
+        margin-bottom: 12px;
+    }
+
+    .nav-mask {
+        display: block;
+        opacity: 0;
+        pointer-events: none;
+    }
+    body.nav-open .nav-mask {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    /* 头像: 从"英雄区左边"挪到"顶栏第一行左边", 缩成 32px  */
+    .hero-avatar {
+        top: 12px;
+        left: var(--gutter);
+        width: 32px;
+        height: 32px;
+        font-size: 24px;
+    }
+    body.scrolled .hero-avatar {
+        top: 12px;
+        width: 32px;
+        height: 32px;
+        font-size: 15px;
+    }
+
+    /* 英雄区: 手机上整块收起 —— 欢迎语和台词只留给桌面 */
+    .hero {
+        height: 128px;          /* 24 + 80 + 24，跟桌面同一个公式 */
+        padding-left: 104px;    /* 80 + 24 —— 让文字避开头像 */
+    }
+    .hero-avatar {
+        top: 80px;              /* 顶栏 56 + 24 */
+        left: var(--gutter);
+        width: 80px;
+        height: 80px;
+        font-size: 32px;
+    }
+    .hero-welcome {
+        font-size: 17px;
+    }
+    .hero-quote {
+        font-size: 12px;
+    }
+
+    /* 收起态: 头像飞进顶栏第一行 (跟桌面同一套动作) */
+    body.scroll .hero {
+        height: 0;
+        padding-left: 0;
+    }
+    body.scrolled .hero-avatar {
+        top: 10px;
+        width: 32px;
+        height: 32px;
+        font-size: 15px;
+    }
+
+    /* 网格降列 */
+    .anime-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+    .chart-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    /* 悬浮刷新按钮小一号 */
+    #btn-refresh {
+        width: 40px;
+        height: 40px;
+        right: 14px;
+        bottom: 14px;
+    }
+}
