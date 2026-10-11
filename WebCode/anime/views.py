@@ -82,16 +82,29 @@ CHART_PAGES = {
     },
 }
 
-def _foryou_pool(seed, user):
-    """『猜你喜欢』池子: 20 部。
-    · 有评分 -> 相似度扩散，结果由评分决定
-    · 没评分 -> 热门池随机，冷启动兜底，跟首页共用同一颗种子
-    """
-    # 甲: 有燃料 -> 真推荐
-    recs = recommend_for_user(user, 20)
-    if recs:
-        return [aid for aid, _ in recs]
+def _foryou_pool(seed, user, start=0, size=20):
+    """『猜你喜欢』池子 —— 一条排好队的长队列，切片给出第 N 批。
 
+    队列的构成 (从懂你到泛化) :
+      1. 有评分 -> 相似度扩散       (最懂你，排最前)
+      2. 有标签 -> 标签召回补足     (沾边，接在后面)
+      3. 都没有 -> 热门池洗牌兜底   (游客 / 新用户)
+
+    把"随机抽 20 部"换成"整池洗一次牌再切片", 于是:
+    · 同一颗种子 -> 顺序完全一样 (第 2 页不会跟第 1 页重复)
+    · 第 N 批天然互不重叠 -> 往后滚多少批都不重样
+    
+
+    start / size: 要第几批、每批几部。默认 start=0 size=20 = 原来的前 20 部。
+    """
+    LIMIT = 900
+
+    recs = recommend_for_user(user, LIMIT)
+    ordered = [aid for aid, _ in recs]
+    if ordered:
+        return ordered[start:start + size]
+
+    # 3. 冷启动兜底: 游客 / 没评分也没标签的新用户
     rng = random.Random(seed + "-foryou")
 
     pool = list(Anime.objects.filter(rating_count__gte=300)
@@ -105,7 +118,8 @@ def _foryou_pool(seed, user):
             pool = list(Anime.objects.filter(rating_count__gte=300)
                         .values_list("subject_id", flat=True))
 
-    return rng.sample(pool, min(20, len(pool)))
+    rng.shuffle(pool)
+    return pool[start:start + size]
 
 def anime_list(request):                # 函数名必须和 urls 里一致
     # 种子三级兜底: URL > session > 现生一颗
@@ -246,7 +260,15 @@ def anime_for_you(request):
         seed = str(random.random())
         request.session["home_seed"] = seed
 
-    pool_ids = _foryou_pool(seed, request.user)
+    BATCH = 20
+    try:
+        page = int(request.GET.get("page", 1))
+    except ValueError:
+        page = 1
+    if page < 1:
+        page = 1
+
+    pool_ids = _foryou_pool(seed, request.user, (page - 1) * BATCH, BATCH)
 
     # 按池子自己的顺序取回来 
     order = {sid: i for i, sid in enumerate(pool_ids)}
@@ -254,6 +276,11 @@ def anime_for_you(request):
                                 .prefetch_related("tag_links__tag"),
                    key=lambda a: order[a.subject_id]
     )
+
+    # 带暗号 = 滚动加载，只回数据行
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return render(request, "anime/_for_you_rows.html",
+                      {"picks": picks, "mark": mark})
 
     # 点到的动漫放到最前面
     if mark.isdigit():

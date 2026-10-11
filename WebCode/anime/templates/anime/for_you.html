@@ -6,25 +6,8 @@
 {% block content %}
     <h2>猜你喜欢</h2>
 
-    <div class="row-list">
-        {% for a in picks %}
-        <a class="row-item {% if mark == a.subject_id|stringformat:'s' %}is-marked{% endif %}"
-           href="/anime/{{ a.subject_id }}">
-           <img class="row-cover" src="{% static a.local_cover %}" alt="{{ a.name }}" loading="lazy">
-           <div class="row-body">
-                <div class="row-title">{{ a.name }}</div>
-                <div class="row-meta">
-                    {{ a.air_date|date:"Y-m-d"|default:"—" }}
-                    · {{ a.rating }} 分
-                    {% if a.tag_links.all %}
-                    · {% for t in a.tag_links.all %}{{ t.tag.name }}{% if not forloop.last %} / {% endif %}{% endfor %}
-                    {% endif %}
-                    {% if a.episodes %}· {{ a.episodes }} 话{% endif %}
-                </div>
-                <div class="row-meta">导演：{{ a.director|default:"—" }}</div>
-           </div>
-        </a>
-        {% endfor %}
+    <div class="row-list" id="foryou-list">
+        {% include "anime/_for_you_rows.html" %}
     </div>
 
     <p class="foryou-hint">
@@ -36,4 +19,40 @@
             基于你的 {{ my_rating_count }} 部评分。
         {% endif %}
     </p>
+    <p id="loading">加载中……</p>
+    <p id="end" style="display: none;">已经到底啦~</p>
+
+    <script>
+        let currentPage = 1;        // 当前在第几批
+        let loading = false;        // 防重复请求的保险丝
+
+        window.addEventListener("scroll", function () {
+            // 滚动条离底部不足 200px -> 预加载下一批
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
+                loadNextPage();
+            }
+        });
+
+        function loadNextPage() {
+            if (loading) {
+                return;
+            }
+            loading = true;
+            currentPage += 1;
+
+            fetch("/foryou/?page=" + currentPage, {
+                headers: {"X-Requested-With": "XMLHttpRequest"}     // 接头暗号
+            })
+            .then(res => res.text())
+            .then(html => {
+                if (html.trim() == "") {        // 空响应 = 到底了
+                    document.getElementById("loading").style.display = "none";
+                    document.getElementById("end").style.display = "block";
+                    return;
+                }
+                document.getElementById("foryou-list").insertAdjacentHTML("beforeend", html);
+                loading = false;
+            });
+        }
+    </script>
 {% endblock %}

@@ -62,7 +62,7 @@ def _by_ratings(user, limit):
         return []
     return rank(score_candidates(ratings, get_sim()), limit)
 
-def _by_tags(user, limit):
+def _by_tags(user, limit, exclude=()):
     """路 2: 没评分时 -> 用他选的标签召回
     排序 = 命中数降序 -> 热度降序 -> id 升序"""
     from .models import UserTag, AnimeTag, Anime, UserRating
@@ -77,10 +77,11 @@ def _by_tags(user, limit):
     # 已经打过分的别再推 (路 1 失败时可能走到这儿)
     rated = set(UserRating.objects.filter(user=user)
                 .values_list("anime_id", flat=True))
+    excl = set(exclude)
 
     hits = {}
     for aid in AnimeTag.objects.filter(tag_id__in=tag_ids).values_list("anime_id", flat=True):
-        if aid not in rated:
+        if aid not in rated and aid not in excl:
             hits[aid] = hits.get(aid, 0) + 1
     if not hits:
         return []
@@ -94,22 +95,24 @@ def _by_tags(user, limit):
 
 
 def recommend_for_user(user, limit=20):
-    """多路召回
+    """多路召回 —— 接力，不是二选一
+
+    1. 有评分 -> 相似度扩散  (最懂你，排最前)
+    2. 有标签 -> 标签召回补足 (沾边，接在后面)
+
+    两条路是接力关系: 1. 给不满 limit 时，2. 上场把队列续上。
     返回 [(动漫id, 分数), ...]
-    ⚠️ 分数只在同一路内有意义(①是证据量 0~15, ②是命中数 1~3), 调用方只该用 id
+    分数只在同一路内有意义 0~15, 2是命中数 1~3)，调用方只该用 id 顺序
     """
     if not user.is_authenticated:
         return []
 
     recs = _by_ratings(user, limit)
-    if recs:
-        return recs
+    if len(recs) < limit:
+        seen = {aid for aid, _ in recs}
+        recs = recs + _by_tags(user, limit - len(recs), exclude=seen)
 
-    recs = _by_tags(user, limit)
-    if recs:
-        return recs
-
-    return []
+    return recs
 
 def pick_by_tags(user, limit, exclude=()):
     """『按标签分组』召回 —— 每个自选标签轮流拿一部，保证都有份

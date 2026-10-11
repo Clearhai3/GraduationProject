@@ -1,0 +1,19 @@
+{% load static %}
+{% for a in picks %}
+<a class="row-item {% if mark == a.subject_id|stringformat:'s' %}is-marked{% endif %}"
+   href="/anime/{{ a.subject_id }}">
+   <img class="row-cover" src="{% static a.local_cover %}" alt="{{ a.name }}" loading="lazy">
+   <div class="row-body">
+        <div class="row-title">{{ a.name }}</div>
+        <div class="row-meta">
+            {{ a.air_date|date:"Y-m-d"|default:"—" }}
+            · {{ a.rating }} 分
+            {% if a.tag_links.all %}
+            · {% for t in a.tag_links.all %}{{ t.tag.name }}{% if not forloop.last %} / {% endif %}{% endfor %}
+            {% endif %}
+            {% if a.episodes %}· {{ a.episodes }} 话{% endif %}
+        </div>
+        <div class="row-meta">导演: {{ a.director|default:"—" }}</div>
+   </div>
+</a>
+{% endfor %}
