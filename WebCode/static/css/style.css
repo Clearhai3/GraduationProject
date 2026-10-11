@@ -613,11 +613,7 @@ th {
 }
 
 /* 窄屏: 手机 / 平板竖屏 (viewport 打开后的最小适配) */
-@media (max-width: 768px) {
-    :root {
-        --gutter: 16px;     /* 左右边距 32 -> 16，.container 自动跟着变 */
-    }
-
+@media (max-width: 1151.98px) {
     body {
         min-width: 0;       /* 松开 1152 下界 —— 最关键的一行 */
     }
@@ -630,7 +626,6 @@ th {
         padding: 10px var(--gutter);
     }
     .logo {
-        font-size: 16px;
         white-space: nowrap;
     }
     body.scrolled .logo {
@@ -765,6 +760,17 @@ th {
         width: 32px;
         height: 32px;
         font-size: 15px;
+    }
+}
+
+/* 手机专属: 比平板再紧一档 (平板用上面那套，这里只是叠加覆盖) */
+@media (max-width: 768px) {
+    :root {
+        --gutter: 16px;     /* 左右边距 32 -> 16 .container 自动跟着变 */
+    }
+
+    .logo {
+        font-size: 16px;
     }
 
     /* 网格降列 */
