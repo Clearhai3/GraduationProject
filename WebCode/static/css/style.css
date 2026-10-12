@@ -607,7 +607,7 @@ th {
     display: none;          /* 桌面没这个东西 */
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.35);
+    background: transparent;
     z-index: 250;           /* nav(100) < 遮罩(250) < 抽屉(300) */
     transition: opacity 0.25s ease;
 }

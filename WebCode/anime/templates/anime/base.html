@@ -81,9 +81,8 @@
                     </div>
                 </div>
             </div>
+            <div class="nav-mask" id="nav-mask"></div>
         </nav>
-
-        <div class="nav-mask" id="nav-mask"></div>
 
         {% if messages %}
             <div class="container" style="margin-top: 16px;">
@@ -138,6 +137,24 @@
                     setOpen(false);
                 });
             }
+            // 人在滑动页面 -> 顺手把抽屉收掉
+            // 在抽屉自己身上滑不算 (那是抽屉在自己滚)，否则抽屉里一滑就关
+            function closeOnScroll(e) {
+                if (!document.body.classList.contains('nav-open')) {
+                    return;
+                }
+                if (e.target && e.target.closest && e.target.closest('.nav-links')) {
+                    return;
+                }
+                setOpen(false);
+            }
+            window.addEventListener('touchmove', closeOnScroll, {
+                passive: true
+            });
+            window.addEventListener('wheel', closeOnScroll, {
+                passive: true
+            });
+
             // 点了抽屉里的链接 -> 页面要跳走了，先关掉 (回来时不会还开着)
             links.addEventListener('click', function (e) {
                 if (e.target.closest('a')) {
@@ -163,8 +180,13 @@
 
             function setOpen(v) {
                 document.body.classList.toggle('search-open', v);
-                if (v && input) {
-                    input.focus();      // 铺开就聚焦，键盘跟着弹出来
+                if (!input) {
+                    return;
+                }
+                if (v) {
+                    input.focus();
+                } else {
+                    input.blur();
                 }
             }
 
@@ -189,6 +211,19 @@
                     setOpen(false);
                 });
             }
+
+            // 人在滑动界面 -> 顺手把搜索收掉
+            function closeSearch() {
+                if (document.body.classList.contains('search-open')) {
+                    setOpen(false);
+                }
+            }
+            window.addEventListener('touchmove', closeSearch, {
+                passive: true
+            });
+            window.addEventListener('wheel', closeSearch, {
+                passive: true
+            });
         })();
 
         // 滚动到一定程度 -> 收起英雄区 (带死区，防止微动时反复抽筋)
