@@ -55,7 +55,8 @@
                 </button>
             </div>
             
-            <a href="{% url 'user_profile' %}" class="hero-avatar">
+            <a href="{% if user.is_authenticated %}{% url 'user_profile' %}{% else %}{% url 'user_login' %}{% endif %}" 
+               class="hero-avatar"{% if not user.is_authenticated %} id="hero-login"{% endif %}>
                 {% if user.is_authenticated and user.profile.avatar %}
                     <img src="{{ user.profile.avatar.url }}" alt="头像">
                 {% elif user.is_authenticated %}
@@ -107,6 +108,27 @@
                 <path d="M21 4v5h-5"/>
            </svg>        
         </a>
+
+        <!-- 登录弹窗 (第一刀: 能用版; 毛玻璃/动画在后面几刀) -->
+        <div class="auth-modal" id="auth-modal">
+            <div class="auth-backdrop"></div>
+            <div class="auth-panel">
+                <button type="button" class="auth-close" aria-label="关闭">×</button>
+                <h2 class="auth-title">登录</h2>
+                <p class="auth-error"></p>
+                <form method="post" action="{% url 'user_login' %}">
+                    {% csrf_token %}
+                    <label class="auth-field">用户名
+                        <input type="text" name="username" required>
+                    </label>
+                    <label class="auth-field">密码
+                        <input type="password" name="password" required>
+                    </label>
+                    <button type="submit" class="auth-submit">登录</button>
+                </form>
+                <p class="auth-switch">还没有账号？<a href="{% url 'user_register' %}">去注册</a></p>
+            </div>
+        </div>
     </div>
     <script>
         // 手机端: ☰ 开合抽屉
@@ -400,7 +422,97 @@
                 location.href = lab.dataset.foryou;
             });
         })();
-    </script>
 
+        // 登录弹窗 开/合 (第一刀: 只做开关；毛玻璃 / FLIP / 乱码都在后面几刀)
+        (function () {
+            const modal = document.getElementById('auth-modal');
+            const opener = document.getElementById('hero-login');
+            const closer = document.querySelector('.auth-close');
+            const panel = modal.querySelector('.auth-panel');
+            const form = modal.querySelector('form');
+            const errorBox = modal.querySelector('.auth-error');
+            const submitBtn = modal.querySelector('.auth-submit');
+            if (!modal || !opener) {
+                return;
+            }
+
+            function setOpen(v) {
+                modal.classList.toggle('on', v);
+                if (!v) {
+                    return;
+                }
+                if (errorBox) {
+                    errorBox.classList.remove('on');        // 上次的错别带进来
+                    errorBox.textContent = '';
+                }
+                const first = modal.querySelector('input');
+                if (first) {
+                    first.focus();
+                }
+            }
+
+            opener.addEventListener('click', function (e) {
+                e.preventDefault();     // 别让它跳去 /login/
+                setOpen(true);
+            });
+            if (closer) {
+                closer.addEventListener('click', function () {
+                    setOpen(false);
+                });
+            }
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    setOpen(false);
+                }
+            });
+
+            // 提交改走 AJAX: 失败就地报错 + 抖动，不跳页面
+            if (form) {
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    if (submitBtn) {
+                        submitBtn.disabled = true;      // 随手快连点
+                    }
+                    fetch(form.action, {
+                        method: 'POST',
+                        body: new FormData(form),
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(function (r) {
+                        return r.json();
+                    })
+                    .then(function (data) {
+                        if (data.ok) {
+                            location.reload();      // 就地刷新: 顶栏/英雄区自然便对
+                            return;
+                        }
+                        showError(data.error || '登录失败');
+                    })
+                    .catch(function () {
+                        showError('网络好像出了点问题，再试一次？');
+                    })
+                    .finally(function () {
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                        }
+                    });
+                });
+            }
+
+            function showError(msg) {
+                if (errorBox) {
+                    errorBox.textContent = msg;
+                    errorBox.classList.add('on');
+                }
+                if (panel) {
+                    panel.classList.remove('shake');    // 先摘掉
+                    void panel.offsetHeight;            // 逼它重排，动画才会重播
+                    panel.classList.add('shake');
+                }
+            }
+        })();
+    </script>
 </body>
 </html>

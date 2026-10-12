@@ -615,17 +615,26 @@ def user_register(request):
     return render(request, "anime/register.html", {"form": form})
 
 def user_login(request):
-    """登录 —— 两步: 先验证正身，再发通行证"""
+    """登录 —— 两步: 先验证正身，再发通行证
+    
+    两种客人:
+      页面来的 (独立登录页) -> 老逻辑: 失败重新渲染页面
+      框来的 (AJAX)       -> 返回 JSON，红字和抖动交给前端
+    """
     if request.method == "POST":
         username = request.POST.get("username")
         password = request.POST.get("password")
-
-        # 第一步: 验证正身 (查无此人 或 密码不对 -> 返回 None)
-        user = authenticate(request, username = username, password = password)
+        user = authenticate(request, username=username, password=password)
+        is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
 
         if user is not None:
-            login(request, user)                # 第二步: 发通行证(写 session)
+            login(request, user)
+            if is_ajax:
+                return JsonResponse({"ok": True})
             return redirect("anime_list")
+
+        if is_ajax:
+            return JsonResponse({"ok": False, "error": "账号或密码不对"})
 
         return render(request, "anime/login.html", {"error": "账号或密码不对"})
 

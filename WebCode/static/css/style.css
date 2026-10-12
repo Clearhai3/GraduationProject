@@ -790,3 +790,128 @@ th {
         bottom: 14px;
     }
 }
+
+/* 登录弹窗 (第一刀: 能用版) */
+.auth-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 400;       /* 压过 顶栏(100) / 遮罩(250) / 抽屉(300) */
+}
+.auth-modal.on {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.auth-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);    /* 第三刀换成白纱毛玻璃 */
+}
+.auth-panel {
+    position: relative;
+    width: 360px;
+    max-width: calc(100vw - 32px);
+    padding: 28px 28px 24px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+}
+.auth-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: none;
+    color: var(--muted);
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+}
+.auth-close:hover {
+    background: var(--placeholder);
+    color: var(--text);
+}
+.auth-title {
+    margin: 0 0 20px;
+    font-size: 20px;
+}
+.auth-field {
+    display: block;
+    margin-bottom: 14px;
+    font-size: 14px;
+    color: var(--muted);
+}
+.auth-field input {
+    display: block;
+    width: 100%;
+    margin-top: 6px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 16px;        /* 16px: 不然 iOS 一点就放大整页 */
+    color: var(--text);
+}
+.auth-field input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+.auth-submit {
+    width: 100%;
+    margin-top: 6px;
+    padding: 11px;
+    border: none;
+    border-radius: 8px;
+    background: var(--text);
+    color: #fff;
+    font-size: 15px;
+    cursor: pointer;
+}
+.auth-submit:hover {
+    background: #000;
+}
+.auth-switch {
+    margin: 16px 0 0;
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+}
+.auth-error {
+    display: none;
+    margin: 0 0 14px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: #fef2f2;
+    color: #c53030;
+    font-size: 13px;
+}
+.auth-error.on {
+    display: block;
+}
+
+/* 输错密码时框体轻抖 —— 幅度小、时间短，目的是"提醒"不是"惩罚" */
+@keyframes auth-shake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    20%      {
+        transform: translateX(-8px);
+    }
+    40%      {
+        transform: translateX(7px);
+    }
+    60%      {
+        transform: translateX(-5px);
+    }
+    80%      {
+        transform: translateX(3px);
+    }
+}
+.auth-panel.shake {
+    animation: auth-shake 0.4s ease;
+}
