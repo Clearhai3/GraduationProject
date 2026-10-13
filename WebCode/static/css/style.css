@@ -915,3 +915,16 @@ th {
 .auth-panel.shake {
     animation: auth-shake 0.4s ease;
 }
+
+/* 两个面板只有 .on 的那个露脸 */
+.auth-panel {
+    display: none;
+}
+.auth-panel.on {
+    display: block;
+}
+.auth-help {
+    margin: -4px 0 14px;
+    font-size: 12px;
+    color: var(--muted);
+}

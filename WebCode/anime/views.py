@@ -2,6 +2,7 @@ from .models import Anime, UserRating, UserProfile, Tag, UserTag  # 导入你建
 from django.shortcuts import render, redirect, get_object_or_404  # 自动回复 404 未找到
 from django.contrib.auth import authenticate, login, logout     # 登录三件套
 from django.contrib.auth.decorators import login_required       # 登录请求，用于登录后操作
+from django import forms                                        # 造表单要用
 from django.contrib.auth.forms import UserCreationForm          # 注册表单(含加密)
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.http import HttpResponse, Http404, JsonResponse
@@ -601,18 +602,61 @@ def anime_chart_detail(request, name):
         "chart_data": json.dumps(chart_data, ensure_ascii=False),
     })
 
-def user_register(request):
-    """注册 —— 表单帮我们把密码加密后入库"""
-    if request.method == "POST":
-        form = UserCreationForm(request.POST)   # 把用户填的东西装进表单
-        if form.is_valid():                     # 表单自检: 密码够长吗/两次一样吗
-            user = form.save()                  # 存库(密码已加密)
-            login(request, user)                # 顺手登录
-            return redirect("anime_list")
-    else:
-        form = UserCreationForm()               # GET 请求 = 给一张空表
+class RegisterForm(UserCreationForm):
+    """注册表单 —— 在 Django 自带表单上收窄用户长度
+    
+    只改【校验】不碰【存储】
+      数据库 username 列还是 150 (留余量) , 这里限 15 (产品规则)
+      —— 哪天想放宽到 20, 改这个数字就行，不用动表
+    """
 
-    return render(request, "anime/register.html", {"form": form})
+    username = forms.CharField(
+        label="用户名",
+        max_length=15,
+        widget=forms.TextInput(attrs={
+            "maxlength": "15"
+        }),
+    )
+
+def user_register(request):
+    """注册 —— 表单帮我们把密码加密后入库
+    
+    两种客人 (同 user_login) ：
+      页面来的 (独立注册页) -> 老逻辑: 失败重新渲染页面
+      框来的 (AJAX)       -> 返回 JSON，红字和抖动交给前端
+    """
+    is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+
+    if request.method == "POST":
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            if is_ajax:
+                return JsonResponse({
+                    "ok": True
+                })
+            return redirect("anime_list")
+
+        if is_ajax:
+            # Django 报的本来就是中文 (LANGUAGE_CODE = zh-hans)，直接捞第一句
+            first = next(
+                (msg for msgs in form.errors.values() for msg in msgs),
+                "注册信息有误，检查一下",
+            )
+            return JsonResponse({
+                "ok": False, 
+                "error": first
+            })
+        # 页面来的: 照旧带着 form 渲染页面
+
+    else:
+        form = RegisterForm()
+
+    return render(request, "anime/register.html", {
+        "form": form
+    })
+    
 
 def user_login(request):
     """登录 —— 两步: 先验证正身，再发通行证

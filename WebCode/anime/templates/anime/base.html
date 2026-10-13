@@ -109,10 +109,12 @@
            </svg>        
         </a>
 
-        <!-- 登录弹窗 (第一刀: 能用版; 毛玻璃/动画在后面几刀) -->
+        <!-- 登录 / 注册弹窗 (两框切掉；毛玻璃/FLIP 留给后面那一刀) -->
         <div class="auth-modal" id="auth-modal">
             <div class="auth-backdrop"></div>
-            <div class="auth-panel">
+            
+            <!-- 登录框 -->
+            <div class="auth-panel on" id="panel-login">
                 <button type="button" class="auth-close" aria-label="关闭">×</button>
                 <h2 class="auth-title">登录</h2>
                 <p class="auth-error"></p>
@@ -126,7 +128,29 @@
                     </label>
                     <button type="submit" class="auth-submit">登录</button>
                 </form>
-                <p class="auth-switch">还没有账号？<a href="{% url 'user_register' %}">去注册</a></p>
+                <p class="auth-switch">还没有账号？<a href="{% url 'user_register' %}" class="auth-to-register">去注册</a></p>
+            </div> 
+
+            <!-- 注册框 -->
+            <div class="auth-panel" id="panel-register">
+                <button type="button" class="auth-close" aria-label="关闭">×</button>
+                <h2 class="auth-title">注册</h2>
+                <p class="auth-error"></p>
+                <form method="post" action="{% url 'user_register' %}">
+                    {% csrf_token %}
+                    <label class="auth-field">用户名
+                        <input type="text" name="username" maxlength="15" required>
+                    </label>
+                    <label class="auth-field">密码
+                        <input type="password" name="password1" required>
+                    </label>
+                    <label class="auth-field">确认密码
+                        <input type="password" name="password2" required>
+                    </label>
+                    <p class="auth-help">密码至少 8 位，且不能全是数字</p>
+                    <button type="submit" class="auth-submit">注册</button>
+                </form>
+                <p class="auth-switch">已经有账号了？<a href="{% url 'user_login' %}" class="auth-to-login">去登录</a></p>
             </div>
         </div>
     </div>
@@ -423,55 +447,98 @@
             });
         })();
 
-        // 登录弹窗 开/合 (第一刀: 只做开关；毛玻璃 / FLIP / 乱码都在后面几刀)
+        // 登录 / 注册弹窗 (一套逻辑管两个面板；毛玻璃 / FLIP / 乱码留给后面那一刀)
         (function () {
             const modal = document.getElementById('auth-modal');
             const opener = document.getElementById('hero-login');
-            const closer = document.querySelector('.auth-close');
-            const panel = modal.querySelector('.auth-panel');
-            const form = modal.querySelector('form');
-            const errorBox = modal.querySelector('.auth-error');
-            const submitBtn = modal.querySelector('.auth-submit');
             if (!modal || !opener) {
                 return;
             }
 
-            function setOpen(v) {
+            const panels = {
+                login: document.getElementById('panel-login'),
+                register: document.getElementById('panel-register')
+            };
+
+            function showPanel(which) {
+                Object.keys(panels).forEach(function (k) {
+                    if (panels[k]) {
+                        panels[k].classList.toggle('on', k === which);
+                    }
+                });
+            }
+
+            function setOpen(v, which) {
                 modal.classList.toggle('on', v);
                 if (!v) {
                     return;
                 }
-                if (errorBox) {
-                    errorBox.classList.remove('on');        // 上次的错别带进来
-                    errorBox.textContent = '';
-                }
-                const first = modal.querySelector('input');
+                showPanel(which || 'login');
+                modal.querySelectorAll('.auth-error').forEach(function (b) {
+                    b.classList.remove('on');       // 上次的错别带进来
+                });
+                const first = modal.querySelector('.auth-panel.on input');
                 if (first) {
                     first.focus();
                 }
             }
 
+            function showError(panel, box, msg) {
+                if (box) {
+                    box.textContent = msg;
+                    box.classList.add('on');
+                }
+                panel.classList.remove('shake');    // 先摘掉
+                void panel.offsetHeight;            // 逼它重排，动画才会重播
+                panel.classList.add('shake');
+            }
+
             opener.addEventListener('click', function (e) {
-                e.preventDefault();     // 别让它跳去 /login/
-                setOpen(true);
+                e.preventDefault();     // 别让它跳进去 /login/
+                setOpen(true, 'login');
             });
-            if (closer) {
-                closer.addEventListener('click', function () {
+
+            modal.querySelectorAll('.auth-close').forEach(function (btn) {
+                btn.addEventListener('click', function () {
                     setOpen(false);
                 });
+            });
+
+            // 登录 <-> 注册: 只切面板，不关框
+            const toRegister = modal.querySelector('.auth-to-register');
+            const toLogin = modal.querySelector('.auth-to-login');
+            if (toRegister) {
+                toRegister.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    showPanel('register');
+                });
             }
+            if (toLogin) {
+                toLogin.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    showPanel('login');
+                });
+            }
+
             document.addEventListener('keydown', function (e) {
                 if (e.key === 'Escape') {
                     setOpen(false);
                 }
             });
 
-            // 提交改走 AJAX: 失败就地报错 + 抖动，不跳页面
-            if (form) {
+            // 两个表单共用一套提交逻辑
+            modal.querySelectorAll('.auth-panel').forEach(function (panel) {
+                const form = panel.querySelector('form');
+                const errorBox = panel.querySelector('.auth-error');
+                const submitBtn = panel.querySelector('.auth-submit');
+                if (!form) {
+                    return;
+                }
+
                 form.addEventListener('submit', function (e) {
                     e.preventDefault();
                     if (submitBtn) {
-                        submitBtn.disabled = true;      // 随手快连点
+                        submitBtn.disabled = true;      // 防手快连点
                     }
                     fetch(form.action, {
                         method: 'POST',
@@ -485,13 +552,13 @@
                     })
                     .then(function (data) {
                         if (data.ok) {
-                            location.reload();      // 就地刷新: 顶栏/英雄区自然便对
+                            location.reload();      // 就地刷新: 顶栏 / 英雄区自然变对
                             return;
                         }
-                        showError(data.error || '登录失败');
+                        showError(panel, errorBox, data.error || '出错了，再试一次？');
                     })
                     .catch(function () {
-                        showError('网络好像出了点问题，再试一次？');
+                        showError(panel, errorBox, '网络好像出了点问题，再试一次？');
                     })
                     .finally(function () {
                         if (submitBtn) {
@@ -499,19 +566,7 @@
                         }
                     });
                 });
-            }
-
-            function showError(msg) {
-                if (errorBox) {
-                    errorBox.textContent = msg;
-                    errorBox.classList.add('on');
-                }
-                if (panel) {
-                    panel.classList.remove('shake');    // 先摘掉
-                    void panel.offsetHeight;            // 逼它重排，动画才会重播
-                    panel.classList.add('shake');
-                }
-            }
+            });
         })();
     </script>
 </body>
