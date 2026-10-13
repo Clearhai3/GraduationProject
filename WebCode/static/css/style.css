@@ -928,3 +928,224 @@ th {
     font-size: 12px;
     color: var(--muted);
 }
+
+/* 详情页: 左图右文 */
+.detail-head {
+    display: flex;
+    gap: 44px;
+    align-items: flex-start;    /* 顶部对齐，别让图被拉长 */
+    margin-top: 12px;
+}
+
+.detail-cover {
+    flex: 0 0 360px;            /* 1. 定死，不长大也不缩 */
+}
+
+.detail-cover img {
+    width: 100%;
+    aspect-ratio: 2 / 3;        /* 跟卡片封面同一个比例 */
+    object-fit: cover;
+    border-radius: 8px;
+    background: var(--placeholder);
+}
+
+.detail-info {
+    flex: 1;
+    min-width: 0;               /* 2. 右边不许被内容撑破 */
+}
+
+.detail-info h1 {
+    font-size: 36px;            /* 3. 只给详情页放大，不动全局 h1 */
+    line-height: 1.3;
+    margin: 0 0 4px;
+}
+
+/* 两列规格表: 左边那列按最长的标签自动定宽 */
+.detail-spec {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 10px 20px;
+    margin: 18px 0;
+    font-size: 16px;
+}
+.detail-spec dt {
+    color: var(--muted);
+}
+.detail-spec dd {
+    margin: 0;                  /* 4. dd 自带 40px 左缩进，必须清掉 */
+}
+
+.detail-tags {
+    margin: 12px 0;
+}
+.tag-chip {
+    display: inline-block;
+    padding: 3px 14px;
+    margin: 0 6px 6px 0;
+    border: 1px solid var(--border);
+    border-radius: 999px;       /* 胶囊 */
+    font-size: 14px;
+    color: var(--muted);
+}
+.detail-heat {
+    font-size: 16px;
+    color: var(--muted);
+}
+.sub-name {
+    font-size: 16px;
+    color: var(--muted);        /* 灰色，跟标题拉开层次 */
+}
+
+/* 窄屏: 图在上、信息在下 */
+@media (max-width: 768px) {
+    .detail-head {
+        flex-direction: column;
+        gap: 16px;
+    }
+    .detail-cover {
+        flex: none;
+        width: 180px;
+    }
+    .detail-info h1 {
+        font-size: 22px;
+    }
+}
+
+/* 打分: 5 星 10 档 (半星 = 1 分) */
+.rate-form {
+    margin: 18px 0;
+}
+.rate-cap {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 8px;
+}
+
+/* radio 藏起来，但不能真删 —— 键盘还得能 Tab 到它 */
+.rate-stars input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+
+.stars {
+    position: relative;
+    display: inline-block;
+    font-size: 40px;
+    line-height: 1;
+}
+.layer {
+    display: flex;
+}
+.layer i {
+    flex: 0 0 1em;      /* 1. 每颗星星固定站满 1em —— 百分比全靠这个 */
+    width: 1em;
+    text-align: center;
+    font-style: normal; /* <i> 默认斜体，清掉 */
+}
+.bg {
+    color: #dcdcdc;
+}
+
+/* 上层: 全黑星，只露左边一部分 */
+.fg {
+    position: absolute;
+    left: 0;
+    top: 0;
+    overflow: hidden;
+    width: 0;
+    color: var(--chart-ink, #272727);
+}
+
+/* 点击区: 10 个等分格子盖在星星上，每格正好 = 半颗星 */
+.hit {
+    position: absolute;
+    inset: 0;
+    display: flex;
+}
+.hit label {
+    flex: 1;
+    cursor: pointer;
+}
+
+/* radio 选中 -> 点亮对应比例 (半星 = 1分) */
+#rate-1:checked  ~ .stars .fg { 
+    width: 10%; 
+}
+#rate-2:checked  ~ .stars .fg { 
+    width: 20%; 
+}
+#rate-3:checked  ~ .stars .fg { 
+    width: 30%; 
+}
+#rate-4:checked  ~ .stars .fg { 
+    width: 40%; 
+}
+#rate-5:checked  ~ .stars .fg { 
+    width: 50%; 
+}
+#rate-6:checked  ~ .stars .fg { 
+    width: 60%; 
+}
+#rate-7:checked  ~ .stars .fg { 
+    width: 70%; 
+}
+#rate-8:checked  ~ .stars .fg { 
+    width: 80%; 
+}
+#rate-9:checked  ~ .stars .fg { 
+    width: 90%; 
+}
+#rate-10:checked ~ .stars .fg { 
+    width: 100%; 
+}
+
+#rate-stars:has(.hit label:nth-child(1):hover) .stars .fg {
+    width: 10%;
+}
+#rate-stars:has(.hit label:nth-child(2):hover) .stars .fg {
+    width: 20%;
+}
+#rate-stars:has(.hit label:nth-child(3):hover) .stars .fg {
+    width: 30%;
+}
+#rate-stars:has(.hit label:nth-child(4):hover) .stars .fg {
+    width: 40%;
+}
+#rate-stars:has(.hit label:nth-child(5):hover) .stars .fg {
+    width: 50%;
+}
+#rate-stars:has(.hit label:nth-child(6):hover) .stars .fg {
+    width: 60%;
+}
+#rate-stars:has(.hit label:nth-child(7):hover) .stars .fg {
+    width: 70%;
+}
+#rate-stars:has(.hit label:nth-child(8):hover) .stars .fg {
+    width: 80%;
+}
+#rate-stars:has(.hit label:nth-child(9):hover) .stars .fg {
+    width: 90%;
+}
+#rate-stars:has(.hit label:nth-child(10):hover) .stars .fg {
+    width: 100%;
+}
+
+/* 键盘 Tab 过来时得看见焦点在哪 */
+.rate-stars input:focus-visible ~ .stars {
+    outline: 2px solid var(--primary);
+    outline-offset: 6px;
+    border-radius: 4px;
+}
+
+.rate-form button {
+    margin-top: 16px;
+    padding: 8px 22px;
+    border: none;
+    border-radius: 6px;
+    background: var(--chart-ink, #272727);
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+}

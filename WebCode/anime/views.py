@@ -360,12 +360,20 @@ def anime_rate(request, anime_id):
     raw = request.POST.get("rate", "")          
     score = int(raw) if raw.isdigit() else 0    # 从表单里捞出分数
 
+    saved = 0
     if 1 <= score <= 10:        
         UserRating.objects.update_or_create(
             user = request.user,
             anime = anime,
             defaults = {"rate": score},
         )
+        saved = score
+
+    # 带暗号 = 前端在用 AJXA -> 只回一个 JSON，别刷新
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return JsonResponse({
+            "rate": saved
+        })
 
     return redirect("anime_detail", anime_id = anime_id)
 
