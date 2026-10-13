@@ -503,7 +503,7 @@ def anime_search(request):      # 搜索
     keyword = request.GET.get("q", "")      # 拿用户输入，没输就空
     if keyword:
         results = Anime.objects.filter(
-            Q(name__icontains=keyword) | Q(name_orig__icontain=keyword)
+            Q(name__icontains=keyword) | Q(name_orig__icontains=keyword)
         )[:20] # 名字模糊索
     else:
         results = []
