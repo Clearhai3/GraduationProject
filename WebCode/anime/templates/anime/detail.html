@@ -152,11 +152,9 @@
 
     <h2>相关推荐</h2>
     {% if similar_animes %}
-        <ul>
-        {% for s in similar_animes %}
-            <li><a href="/anime/{{ s.subject_id }}/">{{ s.name }}</a> ({{ s.rating }})</li>
-        {% endfor %}
-        </ul>
+        <div class="anime-grid">
+            {% include "anime/_rows.html" with page=similar_animes %}
+        </div>
     {% else %}
         <p>暂无相关推荐</p>
     {% endif %}

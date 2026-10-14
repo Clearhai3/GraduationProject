@@ -302,7 +302,7 @@ def anime_detail(request, anime_id):
 
     # 新增: 相关推荐
     neighbors = get_sim().get(anime_id, {})
-    similar_ids = [aid for aid, _ in sorted(neighbors.items(), key=lambda kv: (-kv[1], kv[0]))[:6]]
+    similar_ids = [aid for aid, _ in sorted(neighbors.items(), key=lambda kv: (-kv[1], kv[0]))[:20]]
 
     # filter(_in=) 不保存(实测 99% 的番顺序错, MySQL 按主键升序返回) -> 自己拼回去
     order = {sid: i for i, sid in enumerate(similar_ids)}
