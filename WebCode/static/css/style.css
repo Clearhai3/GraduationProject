@@ -1149,3 +1149,46 @@ th {
     font-size: 14px;
     cursor: pointer;
 }
+
+/* 悬浮返回按钮 (左上角，跟右下角的刷新按钮对称) */
+#btn-back {
+    position: fixed;
+    left: 20px;
+    top: 70px;
+    z-index: 110;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    color: var(--muted);
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    transition: top 0.3s ease, color .15s, border-color .15s, box-shadow .15s;
+}
+#btn-back:hover {
+    text-decoration: none;
+    color: var(--primary);
+    border-color: var(--primary);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+/* 首页英雄区展开时: 跟着顶栏下移，避开头像(头像占 y=80~160) */
+body:not(.scrolled) #btn-back {
+    top: 198px;     /* 顶栏 185 + 13 */
+}
+
+/* 宽屏那档英雄区更高(160) */
+@media (min-width: 1152px) {
+    body:not(.scrolled) #btn-back {
+        top: 230px;      /* 定栏 217 + 13 */
+    }
+}   
+
+/* 手机: 左上角是汉堡的地盘，返回交给系统手势 */
+@media (max-width: 768px) {
+    #btn-back {
+        display: none;
+    }
+}

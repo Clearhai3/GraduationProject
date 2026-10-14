@@ -100,6 +100,9 @@
         <main class="container">
             {% block content %}{% endblock %}
         </main>
+    </div>
+    
+        {% block floaters %}{% endblock %}
         <a href="{% url 'anime_reshuffle' %}" id="btn-refresh"
            title="想要换批动漫吗？点这个~" aria-label="换一批">
            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -153,7 +156,6 @@
                 <p class="auth-switch">已经有账号了？<a href="{% url 'user_login' %}" class="auth-to-login">去登录</a></p>
             </div>
         </div>
-    </div>
     <script>
         // 手机端: ☰ 开合抽屉
         (function () {
