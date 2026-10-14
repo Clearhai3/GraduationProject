@@ -129,7 +129,7 @@ STATICFILES_DIRS = [
 ]
 
 # 用户上传的文件 (头像等) —— static 是你给的, media 是用户给的
-MEDIA_URL = 'media/'
+MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # 登录相关
