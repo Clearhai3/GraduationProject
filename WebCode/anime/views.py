@@ -317,11 +317,25 @@ def anime_detail(request, anime_id):
     if request.user.is_authenticated:
         my_rating = UserRating.objects.filter(user = request.user, anime = anime).first()
 
+    # 猜你喜欢: 和 /foryou/ 共用 session 里那颗种子 -> 同一条队列
+    seed = request.session.get("home_seed")
+    if not seed:
+        seed = str(random.random())
+        request.session["home_seed"] = seed
+
+    foryou_pool_ids = _foryou_pool(seed, request.user, 0, 20)
+    order_foryou = {sid: i for i, sid in enumerate(foryou_pool_ids)}
+    foryou_picks = sorted(
+        Anime.objects.filter(subject_id__in=foryou_pool_ids).prefetch_related("tag_links__tag"),
+        key=lambda a: order_foryou[a.subject_id]
+    )
+
     return render(request, "anime/detail.html", {
         "anime": anime, 
         "similar_animes": similar_animes, 
         "score_range": range(1, 11),
         "my_rating": my_rating,
+        "foryou_picks": foryou_picks,
     })
 
 def _compress_avatar(uploaded):

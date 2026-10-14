@@ -159,4 +159,48 @@
         <p>暂无相关推荐</p>
     {% endif %}
 
+    <!-- 猜你喜欢 -->
+    <h2>猜你喜欢</h2>
+    <div class="row-list" id="detail-foryou-list">
+        {% include "anime/_for_you_rows.html" with picks=foryou_picks %}
+    </div> 
+    <p id="detail-loading">加载中……</p>
+    <p id="detail-end" style="display: none;">已经到底啦~</p>
+
+    <script>
+        let detailPage = 1;         // 第 1 批是服务端渲染的，从第 2 批开始接
+        let detailLoading = false;  // 保险丝: 防重复请求
+
+        window.addEventListener("scroll", function () {
+            // 离底部不足2 200px -> 预加载下一批
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
+                loadMoreForyou();
+            }
+        });
+
+        function loadMoreForyou() {
+            if (detailLoading) {
+                return;
+            }
+            detailLoading = true;
+            detailPage += 1;
+
+            fetch("/foryou/?page=" + detailPage, {
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"    // 接头暗号
+                }
+            })
+            .then(res => res.text())
+            .then(html => {
+                if (html.trim() == "") {
+                    document.getElementById("detail-loading").style.display = "none";
+                    document.getElementById("detail-end").style.display = "block";
+                    return;
+                }
+                document.getElementById("detail-foryou-list").insertAdjacentHTML("beforeend", html);
+                detailLoading = false;
+            });
+        }
+    </script>
+
 {% endblock %}
